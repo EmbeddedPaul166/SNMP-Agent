@@ -7,7 +7,7 @@ BUILD_PATH := build
 BIN_PATH := bin
 
 CXX := g++
-CXXFLAGS += -std=c++11 -c -g
+CXXFLAGS += -std=c++11 -g -Wall -Wextra -pedantic
 
 EXECUTABLE := parser
 BIN := $(BIN_PATH)/$(EXECUTABLE)
@@ -26,13 +26,15 @@ LIB := -L /usr/local/lib
 $(BIN): $(OBJECTS)
 	@mkdir -p $(BIN_PATH)
 	@echo "Linking $(BIN)..."
-	$(CXX) $^ -o $(BIN) $(LIB)
+	$(CXX) $^ $(CXXFLAGS) -o $(BIN) $(LIB)
 	@echo "Build done"
 
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@mkdir -p $(BUILD_PATH)
 	@echo "Compiling $<..."
-	$(CXX) $(CXXFLAGS) $(INC) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(INC) -o $@ $<
+
+.PHONY: clean
 
 clean:
 	@echo "Cleaning project..."
