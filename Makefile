@@ -20,7 +20,7 @@ OBJECTS := $(patsubst $(SRC_PATH)/%, $(BUILD_PATH)/%, $(SOURCES:.$(SRC_CPP_EXT)=
 
 INC := -I $(INC_PATH)
 
-$(BIN): $(OBJECTS) $(LIB_OBJECTS) $(ASM_OBJECTS)
+$(BIN): $(OBJECTS) 
 	@mkdir -p $(BIN_PATH)	
 	@echo "Linking $(BIN)..."
 	$(CXX) $^ $(CXXFLAGS) -o $(BIN).elf	

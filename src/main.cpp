@@ -1,7 +1,8 @@
-#include "funkcja.h"
+#include "manager.hpp"
 
 int main() 
 {
+    Manager manager;
     while (1)
     {
         
