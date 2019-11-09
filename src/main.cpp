@@ -1,9 +1,10 @@
-#include <iostream>
-
 #include "funkcja.h"
 
 int main() 
 {
-    funkcja();
+    while (1)
+    {
+        
+    }
     return 0;
 }
