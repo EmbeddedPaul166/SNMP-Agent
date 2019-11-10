@@ -1,15 +1,19 @@
 #ifndef FILEHANDLER_HPP
 #define FILEHANDLER_HPP
 
+#include <string>
+
 class FileHandler
 {
     public:
         FileHandler();
         ~FileHandler();
-    private:
         
+        std::string readFile(std::string filePath);
+    private:
+        std::string m_fileContent;
     protected:
-      
+ 
 };
 
 #endif /*FILEHANDLER_HPP*/

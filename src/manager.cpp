@@ -2,12 +2,17 @@
 
 Manager::Manager()
 {
-    parser = new Parser();
-    fileHandler = new FileHandler();
+    m_pParser.reset(new Parser());
+    m_pFileHandler.reset(new FileHandler());
 }
 
 Manager::~Manager()
 {
-    delete parser;
-    delete fileHandler;
+    
+}
+
+void Manager::updateParsingContent(std::string filePath)
+{
+    std::string fileContent = m_pFileHandler -> readFile(filePath);
+    m_pParser -> updateFileContent(fileContent);
 }
