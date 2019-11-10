@@ -60,13 +60,29 @@ void Tree::initializeRootOfTheTree()
     m_rootOfTheTree = &newNode;
 }
 
-Node * Tree::findNodeByObjectIdentifier(std::string objectIdentifier)
+//Call this function with as such 'findNodeByObjectIdentifier(vector, 0, m_rootOfTheTree)'
+Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID, int vectorPosition, Node * node)
 {
-    
-    return nullptr;    
+    std::list<Node *> childList = node -> m_childElementPointerList;
+    std::list<Node *>::iterator childListIterator = childList.begin();
+    for (auto const & pNode : childList)
+    {   
+        if (pNode -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition) && vectorOfOID.size() - 1 == vectorPosition)
+        {
+            return pNode;        
+        }
+        else if (pNode -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition))
+        {
+            vectorPosition++;
+            findNodeByObjectIdentifier(vectorOfOID, vectorPosition, pNode);
+        }
+        std::advance(childListIterator, 1);
+    }
+    //Exception throw here
+    return nullptr;
 }
 
-Node * Tree::findNodeByName(std::string objectIdentifierParentNode)
+Node * Tree::findNodeByName(std::string objectIdentifierParentNode, std::string name)
 {
     
     return nullptr;

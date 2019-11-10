@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <list>
+#include <vector>
 #include <string>
 
 struct Node
@@ -29,8 +30,8 @@ class Tree
         Node * m_rootOfTheTree;
         
         void initializeRootOfTheTree();
-        Node * findNodeByObjectIdentifier(std::string objectIdentifier); 
-        Node * findNodeByName(std::string objectIdentifierParentNode); 
+        Node * findNodeByObjectIdentifier(std::vector<int> vectorOfOID, int vectorPosition, Node * node); 
+        Node * findNodeByName(std::string objectIdentifierParentNode, std::string name);
     protected:
         
 };
