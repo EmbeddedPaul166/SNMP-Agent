@@ -60,7 +60,8 @@ void Tree::initializeRootOfTheTree()
     m_rootOfTheTree = &newNode;
 }
 
-//Call this function with as such 'findNodeByObjectIdentifier(vector, 0, m_rootOfTheTree)'
+//Call this function with as such 'findNodeByObjectIdentifier(vector, 0, m_rootOfTheTree)' !!!
+//This function should be called inside try catch block and if it returns nullptr it should throw exception!!!
 Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID, int vectorPosition, Node * node)
 {
     std::list<Node *> childList = node -> m_childElementPointerList;
@@ -77,14 +78,13 @@ Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID, int vector
             findNodeByObjectIdentifier(vectorOfOID, vectorPosition, pNode);
         }
         std::advance(childListIterator, 1);
-    }
-    //Exception throw here
+    } 
     return nullptr;
 }
 
 Node * Tree::findNodeByName(std::string objectIdentifierParentNode, std::string name)
 {
-    
+      
     return nullptr;
 }
 
