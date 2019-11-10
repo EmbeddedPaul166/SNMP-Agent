@@ -2,7 +2,7 @@
 
 Tree::Tree()
 {
-    
+    initializeRootOfTheTree(); 
 }
 
 Tree::~Tree()
@@ -10,14 +10,29 @@ Tree::~Tree()
     
 }
 
-void Tree::addNode(int &objectIdentifier, std::string &dataType,
-             std::string &name, std::string &data, Node &previousElement)
+void Tree::addNode(int objectIdentifier, std::string dataType,
+                   std::string name, std::string data,
+                   Node * parentElement)
 { 
+    std::vector <Node *> emptyChildVector;
     Node newNode = {objectIdentifier,
-                    dataType,
                     name,
                     data,
-                    &previousElement};
+                    parentElement,
+                    emptyChildVector};
     
-    m_tree.push_back(newNode);
+    parentElement -> m_childElementPointerVector.push_back(&newNode);
+}
+
+void Tree::initializeRootOfTheTree()
+{
+    addNode(1, "", "ISO", "", nullptr);
+
+    std::vector <Node *> emptyChildVector;
+    Node newNode = {1,
+                    "",
+                    "ISO",
+                    nullptr,
+                    emptyChildVector};
+    m_rootOfTheTree = &newNode;
 }

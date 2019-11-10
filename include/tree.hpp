@@ -7,10 +7,10 @@
 struct Node
 { 
     int m_objectIdentifier;
-    std::string m_dataType;
     std::string m_name;
     std::string m_data;
-    Node * m_pPreviousElement; 
+    Node * m_pParentElement;
+    std::vector<Node *> m_childElementPointerVector;
 };
 
 class Tree
@@ -19,13 +19,15 @@ class Tree
         Tree();
         ~Tree();
         
-        void addNode(int &objectIdentifier, std::string &dataType,
-                     std::string &name, std::string &data,
-                     Node &previousElement);
+        void addNode(int objectIdentifier, std::string dataType,
+                     std::string name, std::string data,
+                     Node * previousElement);
         
         
     private:
-        std::vector<Node> m_tree;
+        Node * m_rootOfTheTree;
+        
+        void initializeRootOfTheTree();
         
     protected:
         
