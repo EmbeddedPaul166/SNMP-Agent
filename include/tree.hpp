@@ -1,7 +1,8 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 
-#include <vector>
+#include <memory>
+#include <list>
 #include <string>
 
 struct Node
@@ -10,7 +11,7 @@ struct Node
     std::string m_name;
     std::string m_data;
     Node * m_pParentElement;
-    std::vector<Node *> m_childElementPointerVector;
+    std::list<Node *> m_childElementPointerList;
 };
 
 class Tree
@@ -28,7 +29,8 @@ class Tree
         Node * m_rootOfTheTree;
         
         void initializeRootOfTheTree();
-        
+        Node * findNodeByObjectIdentifier(std::string objectIdentifier); 
+        Node * findNodeByName(std::string objectIdentifierParentNode); 
     protected:
         
 };
