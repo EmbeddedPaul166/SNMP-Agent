@@ -10,9 +10,7 @@ Tree::~Tree()
     
 }
 
-void Tree::addNode(int objectIdentifier, std::string dataType,
-                   std::string name, std::string data,
-                   Node * parentElement)
+void Tree::addNode(int objectIdentifier, std::string dataType, std::string name, std::string data, Node * parentElement)
 { 
     std::list <Node *> emptyChildList;
     Node newNode = {objectIdentifier,
@@ -21,28 +19,27 @@ void Tree::addNode(int objectIdentifier, std::string dataType,
                     parentElement,
                     emptyChildList};
     
-    if (parentElement -> m_childElementPointerList.empty())
+    std::list<Node *> & childList = parentElement -> m_childElementPointerList;
+    if (childList.empty())
     {
-        parentElement -> m_childElementPointerList.push_back(&newNode); 
+        childList.push_back(&newNode); 
     }
     else
     {
-        std::list<Node *>::iterator iterator = parentElement -> m_childElementPointerList.begin();
-        for (auto const & j : parentElement -> m_childElementPointerList)
+        for (std::list<Node *>::iterator it = childList.begin(); it != childList.end(); it++)
         {
-            int childObjectIdentifier = j -> m_objectIdentifier;
+            int childObjectIdentifier = (*it) -> m_objectIdentifier;
             int newChildObjectIdentifier = newNode.m_objectIdentifier;
             if (newChildObjectIdentifier < childObjectIdentifier)
             {
-                parentElement -> m_childElementPointerList.insert(iterator, &newNode);
+                childList.insert(it, &newNode);
                 break;
             }
-            else if (parentElement -> m_childElementPointerList.end() == iterator)
+            else if (childList.end() == it)
             {
-                parentElement -> m_childElementPointerList.push_back(&newNode);
+                childList.push_back(&newNode);
                 break;
             }
-            std::advance(iterator, 1);
         }
     }
 }
@@ -60,32 +57,82 @@ void Tree::initializeRootOfTheTree()
     m_rootOfTheTree = &newNode;
 }
 
-//Call this function with as such 'findNodeByObjectIdentifier(vector, 0, m_rootOfTheTree)' !!!
+//Call this function with as such 'recursiveSearch(vector, 0, m_rootOfTheTree)' !!!
 //This function should be called inside try catch block and if it returns nullptr it should throw exception!!!
-Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID, int vectorPosition, Node * node)
+Node * Tree::recursiveSearch(std::vector<int> vectorOfOID, unsigned int vectorPosition, Node * node)
 {
-    std::list<Node *> childList = node -> m_childElementPointerList;
-    std::list<Node *>::iterator childListIterator = childList.begin();
-    for (auto const & pNode : childList)
+    std::list<Node *> & childList = node -> m_childElementPointerList;
+    for (std::list<Node *>::iterator it = childList.begin(); it != childList.end(); it++)
     {   
-        if (pNode -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition) && vectorOfOID.size() - 1 == vectorPosition)
+        if ((*it) -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition) && vectorOfOID.size() - 1 == vectorPosition)
         {
-            return pNode;        
+            return (*it);        
         }
-        else if (pNode -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition))
+        else if ((*it) -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition))
         {
             vectorPosition++;
-            findNodeByObjectIdentifier(vectorOfOID, vectorPosition, pNode);
+            recursiveSearch(vectorOfOID, vectorPosition, (*it));
         }
-        std::advance(childListIterator, 1);
     } 
     return nullptr;
 }
 
-Node * Tree::findNodeByName(std::string objectIdentifierParentNode, std::string name)
+Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID)
 {
-      
-    return nullptr;
+    try
+    {
+        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
+        if (pNode == nullptr)
+        {
+            throw "Node not found";
+        }
+        else
+        {
+            return pNode;    
+        }
+    }
+    catch(std::string exception)
+    {
+        std::cout << exception << std::endl;
+        return nullptr;
+    }
+}
+
+Node * Tree::findNodeByName(std::vector<int> vectorOfOID, std::string name)
+{
+    try
+    {
+        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
+        if (pNode == nullptr)
+        {
+            throw "Node not found";
+        }
+        else
+        {
+            Node * pNode =findNodeByObjectIdentifier(vectorOfOID);
+            std::list<Node *> & childList = pNode -> m_childElementPointerList;     
+            if (pNode != nullptr)
+            {
+                for (std::list<Node *>::iterator it = childList.begin(); it != childList.end(); it++)
+                {
+                    if ((*it) -> m_name == name)
+                    {
+                        return (*it);
+                    }
+                }
+                throw "Node not found";
+            }
+            else 
+            {
+                throw "Node not found";    
+            }
+        }
+    }
+    catch(std::string exception)
+    {
+        std::cout << exception << std::endl;
+        return nullptr;
+    }    
 }
 
 

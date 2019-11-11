@@ -1,6 +1,7 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 
+#include <iostream>
 #include <memory>
 #include <list>
 #include <vector>
@@ -21,17 +22,15 @@ class Tree
         Tree();
         ~Tree();
         
-        void addNode(int objectIdentifier, std::string dataType,
-                     std::string name, std::string data,
-                     Node * previousElement);
-        
+        void addNode(int objectIdentifier, std::string dataType, std::string name, std::string data, Node * previousElement);
+        Node * findNodeByObjectIdentifier(std::vector<int> vectorOfOID); 
+        Node * findNodeByName(std::vector<int> vectorOfOID, std::string name);
         
     private:
         Node * m_rootOfTheTree;
         
+        Node * recursiveSearch(std::vector<int> vectorOfOID, unsigned int vectorPosition, Node * node); 
         void initializeRootOfTheTree();
-        Node * findNodeByObjectIdentifier(std::vector<int> vectorOfOID, int vectorPosition, Node * node); 
-        Node * findNodeByName(std::string objectIdentifierParentNode, std::string name);
     protected:
         
 };
