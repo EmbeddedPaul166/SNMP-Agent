@@ -12,6 +12,7 @@ struct Node
     int m_objectIdentifier;
     std::string m_name;
     std::string m_data;
+    std::string * m_data_type;
     Node * m_pParentElement;
     std::list<Node *> m_childElementPointerList;
 };
@@ -22,15 +23,17 @@ class Tree
         Tree();
         ~Tree();
         
-        void addNode(int objectIdentifier, std::string dataType, std::string name, std::string data, Node * previousElement);
+        void addNode(int objectIdentifier, std::string name, std::string data, std::string * dataType, Node * previousElement);
         Node * findNodeByObjectIdentifier(std::vector<int> vectorOfOID); 
         Node * findNodeByName(std::vector<int> vectorOfOID, std::string name);
         
     private:
         Node * m_rootOfTheTree;
+        std::vector<std::string> m_listOfDataTypes;
         
         Node * recursiveSearch(std::vector<int> vectorOfOID, unsigned int vectorPosition, Node * node); 
         void initializeRootOfTheTree();
+        void initializeListOfDataTypes();
     protected:
         
 };

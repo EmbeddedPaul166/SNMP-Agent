@@ -2,7 +2,8 @@
 
 Tree::Tree()
 {
-    initializeRootOfTheTree(); 
+    initializeListOfDataTypes();
+    initializeRootOfTheTree();
 }
 
 Tree::~Tree()
@@ -10,12 +11,13 @@ Tree::~Tree()
     
 }
 
-void Tree::addNode(int objectIdentifier, std::string dataType, std::string name, std::string data, Node * parentElement)
+void Tree::addNode(int objectIdentifier, std::string name, std::string data, std::string * dataType, Node * parentElement)
 { 
     std::list <Node *> emptyChildList;
     Node newNode = {objectIdentifier,
                     name,
                     data,
+                    dataType,
                     parentElement,
                     emptyChildList};
     
@@ -44,14 +46,23 @@ void Tree::addNode(int objectIdentifier, std::string dataType, std::string name,
     }
 }
 
+void Tree::initializeListOfDataTypes()
+{
+    m_listOfDataTypes.push_back("INTEGER");
+    m_listOfDataTypes.push_back("OCTET STRING");
+    m_listOfDataTypes.push_back("OBJECT IDENTIFIER");
+    m_listOfDataTypes.push_back("NULL");
+}
+
 void Tree::initializeRootOfTheTree()
 {
-    addNode(1, "", "ISO", "", nullptr);
+    addNode(1, "", "ISO", nullptr, nullptr);
 
     std::list <Node *> emptyChildList;
     Node newNode = {1,
                     "",
                     "ISO",
+                    nullptr,
                     nullptr,
                     emptyChildList};
     m_rootOfTheTree = &newNode;
