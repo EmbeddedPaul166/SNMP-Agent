@@ -11,13 +11,19 @@ Tree::~Tree()
     
 }
 
-void Tree::addNode(int objectIdentifier, std::string name, std::string data, std::string * dataType, Node * parentElement)
+void Tree::addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
+                   std::string description, Visibility visibility, EncodingType encodingType,
+                   AccessType accessType, StatusType statusType, Node * parentElement)
 { 
     std::list <Node *> emptyChildList;
     Node newNode = {objectIdentifier,
                     name,
-                    data,
                     dataType,
+                    description,
+                    visibility,
+                    encodingType,
+                    accessType,
+                    statusType,
                     parentElement,
                     emptyChildList};
     
@@ -56,13 +62,15 @@ void Tree::initializeListOfDataTypes()
 
 void Tree::initializeRootOfTheTree()
 {
-    addNode(1, "", "ISO", nullptr, nullptr);
-
     std::list <Node *> emptyChildList;
     Node newNode = {1,
-                    "",
                     "ISO",
                     nullptr,
+                    "",
+                    Visibility::UNIVERSAL,
+                    EncodingType::NONE,
+                    AccessType::NOT_ACCESSIBLE,
+                    StatusType::MANDATORY,
                     nullptr,
                     emptyChildList};
     m_rootOfTheTree = &newNode;
@@ -70,7 +78,7 @@ void Tree::initializeRootOfTheTree()
 
 //Call this function with as such 'recursiveSearch(vector, 0, m_rootOfTheTree)' !!!
 //This function should be called inside try catch block and if it returns nullptr it should throw exception!!!
-Node * Tree::recursiveSearch(std::vector<int> vectorOfOID, unsigned int vectorPosition, Node * node)
+Node * Tree::recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int vectorPosition, Node * node)
 {
     std::list<Node *> & childList = node -> m_childElementPointerList;
     for (std::list<Node *>::iterator it = childList.begin(); it != childList.end(); it++)
@@ -88,7 +96,7 @@ Node * Tree::recursiveSearch(std::vector<int> vectorOfOID, unsigned int vectorPo
     return nullptr;
 }
 
-Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID)
+Node * Tree::findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID)
 {
     try
     {
@@ -109,7 +117,7 @@ Node * Tree::findNodeByObjectIdentifier(std::vector<int> vectorOfOID)
     }
 }
 
-Node * Tree::findNodeByName(std::vector<int> vectorOfOID, std::string name)
+Node * Tree::findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name)
 {
     try
     {
