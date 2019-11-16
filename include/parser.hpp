@@ -1,7 +1,10 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include <regex>
+#include <memory>
 #include <string>
+#include <vector>
 #include "tree.hpp"
 
 class Parser
@@ -10,10 +13,13 @@ class Parser
         Parser();
         ~Parser(); 
         
-        void updateFileContent(std::string fileContent);
+        std::string isImportPresent(std::string fileContent);
+        void parseMIBImportFile(std::string fileContent);
+        void parseMIBFile(std::string fileContent);
         
     private:
-        std::string m_fileContent;       
+        std::unique_ptr<Tree> m_pTree;
+        std::vector<std::string> m_importList;
     protected:
       
 };

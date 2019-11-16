@@ -12,7 +12,8 @@ class Manager
         Manager();
         ~Manager();
         
-        void updateParsingContent(std::string filePath);
+        void parse(std::string filePath);
+        void startParsing();
     private:
         std::unique_ptr<Parser> m_pParser;
         std::unique_ptr<FileHandler> m_pFileHandler;

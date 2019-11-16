@@ -1,11 +1,14 @@
 #include <string>
+#include <cstdlib>
 #include "manager.hpp"
 
 int main() 
 {
-    std::string filePath = "/home/paul/Software/Workspace/University/Sieci_Komputerowe/SNMP-Agent/mibs/RFC1213-MIB.txt";
+    
+    std::string filePath(getenv("PROJECT_PATH"));
+    filePath += "/mibs/RFC1213-MIB.txt";
     Manager manager;
-    manager.updateParsingContent(filePath);
+    manager.parse(filePath);
     while (1)
     {
         

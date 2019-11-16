@@ -11,8 +11,14 @@ Manager::~Manager()
     
 }
 
-void Manager::updateParsingContent(std::string filePath)
+void Manager::parse(std::string filePath)
 {
     std::string fileContent = m_pFileHandler -> readFile(filePath);
-    m_pParser -> updateFileContent(fileContent);
+    std::string importPath = m_pParser -> isImportPresent(fileContent);
+    if (importPath != "")
+    {
+        std::string importContent = m_pFileHandler -> readFile(importPath);
+        m_pParser -> parseMIBImportFile(importContent);
+    }
+    m_pParser -> parseMIBFile(fileContent);
 }
