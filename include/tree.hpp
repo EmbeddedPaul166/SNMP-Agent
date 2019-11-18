@@ -14,7 +14,8 @@ enum class Visibility
     UNIVERSAL,
     APPLICATION,
     CONTEXT_SPECIFIC,
-    PRIVATE
+    PRIVATE,
+    NONE
 };
 
 enum class EncodingType
@@ -29,14 +30,16 @@ enum class AccessType
     READ_ONLY,
     WRITE_ONLY,
     READ_WRITE,
-    NOT_ACCESSIBLE
+    NOT_ACCESSIBLE,
+    NONE
 };
 
 enum class StatusType
 {
     MANDATORY,
     OPTIONAL,
-    OBSOLETE
+    OBSOLETE,
+    NONE
 };
 
 struct Node
@@ -59,14 +62,15 @@ class Tree
         Tree();
         ~Tree();
         
-        void addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
+        Node * addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
                      std::string description, Visibility visibility, EncodingType encodingType,
                      AccessType accessType, StatusType statusType, Node * parentElement);
         Node * findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID); 
         Node * findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name);
         
-    private:
         Node * m_rootOfTheTree;
+        
+    private:
         std::vector<std::string> m_listOfDataTypes;
         
         Node * recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int vectorPosition, Node * node); 

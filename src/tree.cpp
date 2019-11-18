@@ -11,7 +11,7 @@ Tree::~Tree()
     
 }
 
-void Tree::addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
+Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
                    std::string description, Visibility visibility, EncodingType encodingType,
                    AccessType accessType, StatusType statusType, Node * parentElement)
 { 
@@ -50,6 +50,8 @@ void Tree::addNode(unsigned int objectIdentifier, std::string name, std::string 
             }
         }
     }
+    Node * pNewNode = &newNode;
+    return pNewNode;
 }
 
 void Tree::initializeListOfDataTypes()
