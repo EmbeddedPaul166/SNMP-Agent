@@ -16,6 +16,7 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
                    AccessType accessType, StatusType statusType, Node * parentElement)
 { 
     std::list <Node *> emptyChildList;
+    emptyChildList.clear();
     Node newNode = {objectIdentifier,
                     name,
                     dataType,
@@ -27,30 +28,32 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
                     parentElement,
                     emptyChildList};
     
-    std::list<Node *> & childList = parentElement -> m_childElementPointerList;
-    if (childList.empty())
+    m_nodeVector.push_back(newNode);
+    
+    //std::list<Node *> & childList = parentElement -> m_childElementPointerList;
+    if (parentElement -> m_childElementPointerList.empty())
     {
-        childList.push_back(&newNode); 
+        parentElement -> m_childElementPointerList.push_back(&m_nodeVector.back()); 
     }
     else
     {
-        for (std::list<Node *>::iterator it = childList.begin(); it != childList.end(); it++)
+        for (std::list<Node *>::iterator it = parentElement -> m_childElementPointerList.begin(); it != parentElement -> m_childElementPointerList.end(); it++)
         {
             int childObjectIdentifier = (*it) -> m_objectIdentifier;
-            int newChildObjectIdentifier = newNode.m_objectIdentifier;
+            int newChildObjectIdentifier = m_nodeVector.back().m_objectIdentifier;
             if (newChildObjectIdentifier < childObjectIdentifier)
             {
-                childList.insert(it, &newNode);
+                parentElement -> m_childElementPointerList.insert(it, &m_nodeVector.back());
                 break;
             }
-            else if (childList.end() == it)
+            else if (parentElement -> m_childElementPointerList.end() == it)
             {
-                childList.push_back(&newNode);
+                parentElement -> m_childElementPointerList.push_back(&m_nodeVector.back());
                 break;
             }
         }
     }
-    Node * pNewNode = &newNode;
+    Node * pNewNode = &m_nodeVector.back();
     return pNewNode;
 }
 
@@ -66,7 +69,7 @@ void Tree::initializeRootOfTheTree()
 {
     std::list <Node *> emptyChildList;
     Node newNode = {1,
-                    "ISO",
+                    "iso",
                     nullptr,
                     "",
                     Visibility::UNIVERSAL,
@@ -75,7 +78,8 @@ void Tree::initializeRootOfTheTree()
                     StatusType::MANDATORY,
                     nullptr,
                     emptyChildList};
-    m_rootOfTheTree = &newNode;
+    m_rootOfTheTree = newNode;
+    m_nodeVector.push_back(newNode);
 }
 
 //Call this function with as such 'recursiveSearch(vector, 0, m_rootOfTheTree)' !!!
@@ -102,7 +106,7 @@ Node * Tree::findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID)
 {
     try
     {
-        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
+        Node * pNode = recursiveSearch(vectorOfOID, 0, &m_rootOfTheTree);
         if (pNode == nullptr)
         {
             throw "Node not found";
@@ -123,7 +127,7 @@ Node * Tree::findNodeByName(std::vector<unsigned int> vectorOfOID, std::string n
 {
     try
     {
-        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
+        Node * pNode = recursiveSearch(vectorOfOID, 0, &m_rootOfTheTree);
         if (pNode == nullptr)
         {
             throw "Node not found";

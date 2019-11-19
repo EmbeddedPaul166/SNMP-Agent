@@ -19,6 +19,7 @@ class Parser
         
     private:
         std::unique_ptr<Tree> m_pTree;
+        Node * m_pPreviousNode;
         std::vector<std::string> m_importList;
     protected:
       

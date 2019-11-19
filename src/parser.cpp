@@ -3,6 +3,7 @@
 
 Parser::Parser()
 {
+    m_pPreviousNode = nullptr;
     m_pTree.reset(new Tree());
 }
 
@@ -39,12 +40,12 @@ void Parser::parseMIBImportFile(std::string fileContent)
     std::regex patternParentNames("\\s+?([^ \\{]\\S*)\\s+?\\d\\s*\\}");
     std::regex patternCutBraceLeft("\\(");
     std::regex patternCutBraceRight("\\)");
-    std::regex patternParentOID("\\(\\d\\)");
+    std::regex patternParentOID("\\(.\\)");
     std::string nodeLine;
     std::string nodeName;
+    std::vector<unsigned int> vectorOID;
     unsigned int OID;
     std::vector<std::string> parentVector;
-    Node * previousNode;
     //Parse for node string line
     while (std::regex_search(fileContent, match, patternOIDLine))
     {
@@ -66,55 +67,64 @@ void Parser::parseMIBImportFile(std::string fileContent)
         //Parse for parent names
         while (std::regex_search(nodeLine, match, patternParentNames))
         {
-            parentVector.push_back(match.str(1));
-            parentVector.back() = std::regex_replace(parentVector.back(), patternCutBraceLeft, "\\(", std::regex_constants::format_first_only);
-            parentVector.back() = std::regex_replace(parentVector.back(), patternCutBraceRight, "\\)", std::regex_constants::format_first_only);
-            std::regex patternCut(parentVector.back());
+            std::string matchString = match.str(1);
+            parentVector.push_back(matchString);
+            matchString = std::regex_replace(matchString, patternCutBraceLeft, "\\(", std::regex_constants::format_first_only);
+            matchString = std::regex_replace(matchString, patternCutBraceRight, "\\)", std::regex_constants::format_first_only);
+            std::regex patternCut(matchString);
             nodeLine = std::regex_replace(nodeLine, patternCut, "", std::regex_constants::format_first_only);
         } 
         fileContent = std::regex_replace(fileContent, patternOIDLine, "", std::regex_constants::format_first_only);
-        //Parse parentVector for parents' OID (number in brackets) 
-        std::vector<unsigned int> vectorOID;
-        for (std::vector<std::string>::iterator it = parentVector.end(); it != parentVector.begin(); it--)
-        {
-            if (regex_search(*it, match, patternParentOID))
-            {
-                vectorOID.push_back(std::stoi(match.str(0)));
-                *it = std::regex_replace(*it, patternParentOID, "");
-            }
-            else
-            {
-                vectorOID.push_back(0);
-            }
-        }
-         
-        //Optionally add parent nodes
+        //Parse parentVector for parents' OID (number in brackets)
         if (parentVector.size() != 1)
         {
-            for (std::vector<std::string>::iterator it = parentVector.end(); it != parentVector.begin(); it--)
+            for (std::vector<std::string>::size_type i = parentVector.size() - 1; i != (std::vector<std::string>::size_type) - 1 ; i--)
             {
-                if (*it == "ISO")
+                if (regex_search(parentVector[i], match, patternParentOID))
                 {
-                    previousNode = m_pTree -> m_rootOfTheTree;
+                    std::string numberInBraces = match.str(0);
+                    numberInBraces.erase(0, 1);
+                    numberInBraces.erase(numberInBraces.size() - 1);
+                    vectorOID.push_back(std::stoi(numberInBraces));
+                    parentVector[i] = std::regex_replace(parentVector[i], patternParentOID, "");
+                }
+                else
+                {
+                    vectorOID.push_back(0);
+                }
+            }
+            
+            for (std::vector<std::string>::size_type i = parentVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
+            {
+                if (parentVector[i] == "iso")
+                {
+                    m_pPreviousNode = &(m_pTree -> m_rootOfTheTree);
                     vectorOID.erase(vectorOID.begin());
                 }
                 else
                 {
                     //Add parent nodes
-                    previousNode = m_pTree -> addNode(vectorOID.front(), *it, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, previousNode);
+                    m_pPreviousNode = m_pTree -> addNode(vectorOID.front(), parentVector[i], nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pPreviousNode);
                     vectorOID.erase(vectorOID.begin());
                     
                 }    
             }
             //Add node
-            previousNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, previousNode);
+            m_pPreviousNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pPreviousNode);
         }
         else
-        { 
-            //Add node
-            previousNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, previousNode);
+        {
+            for (std::vector<std::string>::size_type i = 0; i != m_pTree ->  m_nodeVector.size() - 1 ; i++)
+            {
+                if (m_pTree ->  m_nodeVector[i].m_name == parentVector.front())
+                {
+                    m_pPreviousNode = &(m_pTree ->  m_nodeVector[i]);
+                    break;
+                }
+            }
+            m_pPreviousNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pPreviousNode);
         }
-        
+        parentVector.clear();    
     }   
 }
 

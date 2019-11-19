@@ -68,12 +68,13 @@ class Tree
         Node * findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID); 
         Node * findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name);
         
-        Node * m_rootOfTheTree;
+        Node m_rootOfTheTree;
+        std::vector<Node> m_nodeVector;
         
     private:
         std::vector<std::string> m_listOfDataTypes;
         
-        Node * recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int vectorPosition, Node * node); 
+        Node * recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int vectorPosition, Node * node);
         void initializeRootOfTheTree();
         void initializeListOfDataTypes();
     protected:
