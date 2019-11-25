@@ -30,7 +30,6 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
     
     m_nodeList.push_back(newNode);
     
-    //std::list<Node *> & childList = parentElement -> m_childElementPointerList;
     if (parentElement -> m_childElementPointerList.empty())
     {
         parentElement -> m_childElementPointerList.push_back(&m_nodeList.back()); 
@@ -46,7 +45,7 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
                 parentElement -> m_childElementPointerList.insert(it, &m_nodeList.back());
                 break;
             }
-            else if (parentElement -> m_childElementPointerList.end() == it)
+            else if (parentElement -> m_childElementPointerList.back() == (*it)) //fix this!
             {
                 parentElement -> m_childElementPointerList.push_back(&m_nodeList.back());
                 break;
