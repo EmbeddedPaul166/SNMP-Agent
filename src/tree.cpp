@@ -28,32 +28,32 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
                     parentElement,
                     emptyChildList};
     
-    m_nodeVector.push_back(newNode);
+    m_nodeList.push_back(newNode);
     
     //std::list<Node *> & childList = parentElement -> m_childElementPointerList;
     if (parentElement -> m_childElementPointerList.empty())
     {
-        parentElement -> m_childElementPointerList.push_back(&m_nodeVector.back()); 
+        parentElement -> m_childElementPointerList.push_back(&m_nodeList.back()); 
     }
     else
     {
         for (std::list<Node *>::iterator it = parentElement -> m_childElementPointerList.begin(); it != parentElement -> m_childElementPointerList.end(); it++)
         {
             int childObjectIdentifier = (*it) -> m_objectIdentifier;
-            int newChildObjectIdentifier = m_nodeVector.back().m_objectIdentifier;
+            int newChildObjectIdentifier = m_nodeList.back().m_objectIdentifier;
             if (newChildObjectIdentifier < childObjectIdentifier)
             {
-                parentElement -> m_childElementPointerList.insert(it, &m_nodeVector.back());
+                parentElement -> m_childElementPointerList.insert(it, &m_nodeList.back());
                 break;
             }
             else if (parentElement -> m_childElementPointerList.end() == it)
             {
-                parentElement -> m_childElementPointerList.push_back(&m_nodeVector.back());
+                parentElement -> m_childElementPointerList.push_back(&m_nodeList.back());
                 break;
             }
         }
     }
-    Node * pNewNode = &m_nodeVector.back();
+    Node * pNewNode = &m_nodeList.back();
     return pNewNode;
 }
 
@@ -79,7 +79,7 @@ void Tree::initializeRootOfTheTree()
                     nullptr,
                     emptyChildList};
     m_rootOfTheTree = newNode;
-    m_nodeVector.push_back(newNode);
+    m_nodeList.push_back(newNode);
 }
 
 //Call this function with as such 'recursiveSearch(vector, 0, m_rootOfTheTree)' !!!

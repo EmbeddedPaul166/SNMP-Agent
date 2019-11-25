@@ -3,7 +3,7 @@
 
 Parser::Parser()
 {
-    m_pPreviousNode = nullptr;
+    m_pNode = nullptr;
     m_pTree.reset(new Tree());
 }
 
@@ -42,7 +42,6 @@ void Parser::parseMIBImportFile(std::string fileContent)
     std::regex patternCutBraceRight("\\)");
     std::regex patternParentOID("\\(.\\)");
     std::string nodeLine;
-    std::string nodeName;
     std::vector<unsigned int> vectorOID;
     unsigned int OID;
     std::vector<std::string> parentVector;
@@ -53,8 +52,8 @@ void Parser::parseMIBImportFile(std::string fileContent)
         //Parse for node name
         if (std::regex_search(nodeLine, match, patternNodeName))
         {
-            nodeName = match.str(1);
-            patternCutNodeName.assign(nodeName);
+            m_nodeName = match.str(1);
+            patternCutNodeName.assign(m_nodeName);
             nodeLine = std::regex_replace(nodeLine, patternCutNodeName, "", std::regex_constants::format_first_only);
         }
         
@@ -98,31 +97,31 @@ void Parser::parseMIBImportFile(std::string fileContent)
             {
                 if (parentVector[i] == "iso")
                 {
-                    m_pPreviousNode = &(m_pTree -> m_rootOfTheTree);
+                    m_pNode = &(m_pTree -> m_rootOfTheTree);
                     vectorOID.erase(vectorOID.begin());
                 }
                 else
                 {
                     //Add parent nodes
-                    m_pPreviousNode = m_pTree -> addNode(vectorOID.front(), parentVector[i], nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pPreviousNode);
+                    m_pNode = m_pTree -> addNode(vectorOID.front(), parentVector[i], nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
                     vectorOID.erase(vectorOID.begin());
                     
                 }    
             }
             //Add node
-            m_pPreviousNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pPreviousNode);
+            m_pNode = m_pTree -> addNode(OID, m_nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
         }
         else
         {
-            for (std::vector<std::string>::size_type i = 0; i != m_pTree ->  m_nodeVector.size() - 1 ; i++)
+            for (std::list<Node>::iterator it = m_pTree -> m_nodeList.begin(); it != m_pTree -> m_nodeList.end(); it++)
             {
-                if (m_pTree ->  m_nodeVector[i].m_name == parentVector.front())
+                if ((*it).m_name == parentVector.front())
                 {
-                    m_pPreviousNode = &(m_pTree ->  m_nodeVector[i]);
+                    m_pNode = &(*it);
                     break;
                 }
             }
-            m_pPreviousNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pPreviousNode);
+            m_pNode = m_pTree -> addNode(OID, m_nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
         }
         parentVector.clear();    
     }   

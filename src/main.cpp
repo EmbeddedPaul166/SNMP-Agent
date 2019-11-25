@@ -1,11 +1,17 @@
+#include <iostream>
 #include <string>
 #include <cstdlib>
 #include "manager.hpp"
 
 int main() 
 {
-    
-    std::string filePath(getenv("PROJECT_PATH"));
+    char * pPath =  getenv("PROJECT_PATH");
+    if (pPath == nullptr)
+    {
+        std::cout << "Error: Source set-env file first" << std::endl;
+        return 0;
+    }
+    std::string filePath(pPath);
     filePath += "/mibs/RFC1213-MIB.txt";
     Manager manager;
     manager.parse(filePath);

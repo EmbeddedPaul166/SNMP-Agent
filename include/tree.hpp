@@ -69,7 +69,7 @@ class Tree
         Node * findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name);
         
         Node m_rootOfTheTree;
-        std::vector<Node> m_nodeVector;
+        std::list<Node> m_nodeList;
         
     private:
         std::vector<std::string> m_listOfDataTypes;
