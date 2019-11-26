@@ -18,10 +18,9 @@ class Parser
         void parseMIBFile(std::string fileContent);
         
     private:
-        std::unique_ptr<Tree> m_pTree;
-        std::string m_nodeName;
-        Node * m_pNode;
         std::vector<std::string> m_importList;
+        std::unique_ptr<Tree> m_pTree; 
+        Node * m_pNode;
     protected:
       
 };

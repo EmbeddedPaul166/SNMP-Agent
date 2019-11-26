@@ -9,7 +9,7 @@ BIN_PATH := bin
 
 CXX := g++
 
-CXXFLAGS += -g -std=c++11 -Wall -Wextra -pedantic
+CXXFLAGS += -g -std=c++17 -Wall -Wextra -pedantic
 
 EXECUTABLE := snmp_agent
 BIN := $(BIN_PATH)/$(EXECUTABLE)

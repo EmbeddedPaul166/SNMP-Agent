@@ -2,8 +2,8 @@
 
 Manager::Manager()
 {
-    m_pParser.reset(new Parser());
-    m_pFileHandler.reset(new FileHandler());
+    m_pParser = std::make_unique<Parser>();
+    m_pFileHandler = std::make_unique<FileHandler>();
 }
 
 Manager::~Manager()

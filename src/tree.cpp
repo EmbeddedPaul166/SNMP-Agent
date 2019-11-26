@@ -13,41 +13,33 @@ Tree::~Tree()
 
 Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
                    std::string description, Visibility visibility, EncodingType encodingType,
-                   AccessType accessType, StatusType statusType, Node * parentElement)
+                   AccessType accessType, StatusType statusType, Node * pParentElement)
 { 
     std::list <Node *> emptyChildList;
     emptyChildList.clear();
-    Node newNode = {objectIdentifier,
-                    name,
-                    dataType,
-                    description,
-                    visibility,
-                    encodingType,
-                    accessType,
-                    statusType,
-                    parentElement,
-                    emptyChildList};
+    Node newNode(objectIdentifier, name, dataType, description, visibility, encodingType,
+                    accessType, statusType, pParentElement, emptyChildList);
     
     m_nodeList.push_back(newNode);
     
-    if (parentElement -> m_childElementPointerList.empty())
+    if (pParentElement -> m_childElementPointerList.empty())
     {
-        parentElement -> m_childElementPointerList.push_back(&m_nodeList.back()); 
+        pParentElement -> m_childElementPointerList.push_back(&m_nodeList.back()); 
     }
     else
     {
-        for (std::list<Node *>::iterator it = parentElement -> m_childElementPointerList.begin(); it != parentElement -> m_childElementPointerList.end(); it++)
+        for (std::list<Node *>::iterator it = pParentElement -> m_childElementPointerList.begin(); it != pParentElement -> m_childElementPointerList.end(); it++)
         {
             int childObjectIdentifier = (*it) -> m_objectIdentifier;
             int newChildObjectIdentifier = m_nodeList.back().m_objectIdentifier;
             if (newChildObjectIdentifier < childObjectIdentifier)
             {
-                parentElement -> m_childElementPointerList.insert(it, &m_nodeList.back());
+                pParentElement -> m_childElementPointerList.insert(it, &m_nodeList.back());
                 break;
             }
-            else if (parentElement -> m_childElementPointerList.back() == (*it)) //fix this!
+            else if (pParentElement -> m_childElementPointerList.back() == (*it))
             {
-                parentElement -> m_childElementPointerList.push_back(&m_nodeList.back());
+                pParentElement -> m_childElementPointerList.push_back(&m_nodeList.back());
                 break;
             }
         }
@@ -67,18 +59,10 @@ void Tree::initializeListOfDataTypes()
 void Tree::initializeRootOfTheTree()
 {
     std::list <Node *> emptyChildList;
-    Node newNode = {1,
-                    "iso",
-                    nullptr,
-                    "",
-                    Visibility::UNIVERSAL,
-                    EncodingType::NONE,
-                    AccessType::NOT_ACCESSIBLE,
-                    StatusType::MANDATORY,
-                    nullptr,
-                    emptyChildList};
-    m_rootOfTheTree = newNode;
+    Node newNode(1, "iso", nullptr, "", Visibility::UNIVERSAL, EncodingType::NONE,
+                 AccessType::NOT_ACCESSIBLE, StatusType::MANDATORY, nullptr, emptyChildList);
     m_nodeList.push_back(newNode);
+    m_rootOfTheTree = &m_nodeList.back();
 }
 
 //Call this function with as such 'recursiveSearch(vector, 0, m_rootOfTheTree)' !!!
@@ -105,7 +89,7 @@ Node * Tree::findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID)
 {
     try
     {
-        Node * pNode = recursiveSearch(vectorOfOID, 0, &m_rootOfTheTree);
+        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
         if (pNode == nullptr)
         {
             throw "Node not found";
@@ -126,7 +110,7 @@ Node * Tree::findNodeByName(std::vector<unsigned int> vectorOfOID, std::string n
 {
     try
     {
-        Node * pNode = recursiveSearch(vectorOfOID, 0, &m_rootOfTheTree);
+        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
         if (pNode == nullptr)
         {
             throw "Node not found";
@@ -158,6 +142,5 @@ Node * Tree::findNodeByName(std::vector<unsigned int> vectorOfOID, std::string n
         return nullptr;
     }    
 }
-
 
 

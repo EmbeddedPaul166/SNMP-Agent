@@ -4,7 +4,7 @@
 Parser::Parser()
 {
     m_pNode = nullptr;
-    m_pTree.reset(new Tree());
+    m_pTree = std::make_unique<Tree>();
 }
 
 Parser::~Parser()
@@ -41,10 +41,11 @@ void Parser::parseMIBImportFile(std::string fileContent)
     std::regex patternCutBraceLeft("\\(");
     std::regex patternCutBraceRight("\\)");
     std::regex patternParentOID("\\(.\\)");
-    std::string nodeLine;
     std::vector<unsigned int> vectorOID;
-    unsigned int OID;
     std::vector<std::string> parentVector;
+    std::string nodeLine;
+    std::string nodeName;
+    unsigned int OID;
     //Parse for node string line
     while (std::regex_search(fileContent, match, patternOIDLine))
     {
@@ -52,8 +53,8 @@ void Parser::parseMIBImportFile(std::string fileContent)
         //Parse for node name
         if (std::regex_search(nodeLine, match, patternNodeName))
         {
-            m_nodeName = match.str(1);
-            patternCutNodeName.assign(m_nodeName);
+            nodeName = match.str(1);
+            patternCutNodeName.assign(nodeName);
             nodeLine = std::regex_replace(nodeLine, patternCutNodeName, "", std::regex_constants::format_first_only);
         }
         
@@ -97,7 +98,7 @@ void Parser::parseMIBImportFile(std::string fileContent)
             {
                 if (parentVector[i] == "iso")
                 {
-                    m_pNode = &(m_pTree -> m_rootOfTheTree);
+                    m_pNode = m_pTree -> m_rootOfTheTree;
                     vectorOID.erase(vectorOID.begin());
                 }
                 else
@@ -109,7 +110,7 @@ void Parser::parseMIBImportFile(std::string fileContent)
                 }    
             }
             //Add node
-            m_pNode = m_pTree -> addNode(OID, m_nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
+            m_pNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
         }
         else
         {
@@ -121,7 +122,7 @@ void Parser::parseMIBImportFile(std::string fileContent)
                     break;
                 }
             }
-            m_pNode = m_pTree -> addNode(OID, m_nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
+            m_pNode = m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
         }
         parentVector.clear();    
     }   
