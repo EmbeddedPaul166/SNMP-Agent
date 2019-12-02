@@ -37,16 +37,18 @@ void Parser::parseMIBImportFile(std::string fileContent)
     unsigned int OID;
     std::vector<std::string> parentVector;
     std::vector<unsigned int> vectorOID;
-    std::regex patternOIDLine(".*?OBJECT IDENTIFIER.*?}");
+    std::regex patternOIDLine("\\n[^-].*?OBJECT IDENTIFIER ::=.*?}");
     std::smatch match;
+    std::sregex_iterator begin(fileContent.cbegin(), fileContent.cend(), patternOIDLine);
+    std::sregex_iterator end;
     
-    while (std::regex_search(fileContent, match, patternOIDLine))
+    for (std::sregex_iterator it = begin; it != end; it++)
     {
+        match = *it;
         nodeLine = match.str(0);
         nodeName = parseLineForNodeNameInImport(nodeLine, nodeName);
         OID = parseLineForOIDInImport(nodeLine, OID);
         parseLineForParentNamesInImport(nodeLine, parentVector, vectorOID); 
-        
         if (parentVector.size() != 1)
         {
             addParentNodes(parentVector, vectorOID);
@@ -56,21 +58,14 @@ void Parser::parseMIBImportFile(std::string fileContent)
         {
             m_pNode = addNodeFromImport(nodeName, OID, parentVector);
         }
-        fileContent = std::regex_replace(fileContent, patternOIDLine, "", std::regex_constants::format_first_only);
         parentVector.clear();
         vectorOID.clear();
     }   
 }
 
-void Parser::parseMIBFile(std::string fileContent)
-{
-    
-}
-
-
 std::string Parser::parseLineForNodeNameInImport(std::string & nodeLine, std::string & nodeName)
 {
-    std::regex patternNodeName("(\\w*)\\s*OBJECT IDENTIFIER");
+    std::regex patternNodeName("(\\S*)\\s*OBJECT IDENTIFIER");
     std::regex patternCutNodeName("");
     std::smatch match;
     if (std::regex_search(nodeLine, match, patternNodeName))
@@ -157,3 +152,10 @@ Node * Parser::addNodeFromImport(std::string & nodeName, unsigned int & OID, std
     }
     return m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
 }
+
+void Parser::parseMIBFile(std::string fileContent)
+{
+    parseMIBImportFile(fileContent);
+
+}
+
