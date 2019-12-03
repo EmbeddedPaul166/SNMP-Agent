@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include "parser.hpp"
 //TODO: replace regex_replace with sregex_iterator
-//TODO: add main node data-type parsing and resolve visibility and encoding type problems
+//TODO: add main node data-type parsing and parse special sequence data type nodes
 Parser::Parser()
 {
     m_pNode = nullptr;
