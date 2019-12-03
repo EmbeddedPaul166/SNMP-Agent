@@ -12,13 +12,12 @@ Tree::~Tree()
 }
 
 Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
-                   std::string description, Visibility visibility, EncodingType encodingType,
-                   AccessType accessType, StatusType statusType, Node * pParentElement)
+                   std::string description, AccessType accessType, StatusType statusType,
+                   Node * pParentElement)
 { 
     std::list <Node *> emptyChildList;
     emptyChildList.clear();
-    Node newNode(objectIdentifier, name, dataType, description, visibility, encodingType,
-                    accessType, statusType, pParentElement, emptyChildList);
+    Node newNode(objectIdentifier, name, dataType, description, accessType, statusType, pParentElement, emptyChildList);
     
     m_nodeList.push_back(newNode);
     
@@ -59,8 +58,7 @@ void Tree::initializeListOfDataTypes()
 void Tree::initializeRootOfTheTree()
 {
     std::list <Node *> emptyChildList;
-    Node newNode(1, "iso", nullptr, "", Visibility::UNIVERSAL, EncodingType::NONE,
-                 AccessType::NOT_ACCESSIBLE, StatusType::MANDATORY, nullptr, emptyChildList);
+    Node newNode(1, "iso", nullptr, "", AccessType::NOT_ACCESSIBLE, StatusType::MANDATORY, nullptr, emptyChildList);
     m_nodeList.push_back(newNode);
     m_rootOfTheTree = &m_nodeList.back();
 }

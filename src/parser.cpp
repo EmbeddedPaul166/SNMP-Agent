@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include "parser.hpp"
 //TODO: replace regex_replace with sregex_iterator
+//TODO: add main node data-type parsing and resolve visibility and encoding type problems
 Parser::Parser()
 {
     m_pNode = nullptr;
@@ -141,7 +142,7 @@ void Parser::addParentNodes(std::vector<std::string> & parentVector, std::vector
         }
         else
         {
-            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
+            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], nullptr, "", AccessType::NONE, StatusType::NONE, m_pNode);
         }    
     }
 }
@@ -156,7 +157,7 @@ Node * Parser::addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std:
             break;
         }
     }
-    return m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
+    return m_pTree -> addNode(OID, nodeName, nullptr, "", AccessType::NONE, StatusType::NONE, m_pNode);
 }
 
 void Parser::parseNodes(std::string fileContent)
@@ -179,7 +180,7 @@ void Parser::parseNodes(std::string fileContent)
         match = *it;
         nodeString = match.str(0);
         parseNodeParameters(nodeString, nodeName, OID, accessType, statusType, description, &pParent);
-        addNode(nodeName, OID, accessType, statusType, description, &pParent);
+        m_pNode = addNode(nodeName, OID, accessType, statusType, description, &pParent);
     }
      
 }
@@ -194,7 +195,7 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
         nodeName = match.str(1);
     }
     
-    pattern.assign("(\\d) \\}");
+    pattern.assign("(\\d+) \\}");
     if (std::regex_search(nodeString, match, pattern))
     {
         OID = std::stoi(match.str(1));
@@ -265,7 +266,7 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
 
 Node * Parser::addNode(std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
-    return m_pTree -> addNode(OID, nodeName, nullptr, description, Visibility::NONE, EncodingType::NONE, accessType, statusType, *pParent);
+    return m_pTree -> addNode(OID, nodeName, nullptr, description, accessType, statusType, *pParent);
 }
 
 void Parser::parseMIBFile(std::string fileContent)
