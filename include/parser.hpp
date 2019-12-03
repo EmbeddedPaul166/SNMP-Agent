@@ -17,13 +17,16 @@ class Parser
         void parseMIBImportFile(std::string fileContent);
         void parseMIBFile(std::string fileContent);
         
-    private:
-        std::string parseLineForNodeNameInImport(std::string & nodeLine, std::string & nodeName);
-        unsigned int parseLineForOIDInImport(std::string & nodeLine, unsigned int & OID);
-        void parseLineForParentNamesInImport(std::string & nodeLine, std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID);
+    private: 
+        void parseDiminishedNodes(std::string fileContent);
+        std::string parseLineForNodeNameDiminished(std::string & nodeLine, std::string & nodeName);
+        unsigned int parseLineForOIDDiminished(std::string & nodeLine, unsigned int & OID);
+        void parseLineForParentNamesDiminished(std::string & nodeLine, std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID);
         void addParentNodes(std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID);
-        Node * addNodeFromImport(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector);
-        
+        Node * addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector);
+        Node * addNode(std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
+        void parseNodes(std::string fileContent);
+        void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         std::vector<std::string> m_importList;
         std::unique_ptr<Tree> m_pTree; 
         Node * m_pNode;

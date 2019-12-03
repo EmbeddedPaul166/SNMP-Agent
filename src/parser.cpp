@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include "parser.hpp"
-
+//TODO: replace regex_replace with sregex_iterator
 Parser::Parser()
 {
     m_pNode = nullptr;
@@ -32,6 +32,12 @@ std::string Parser::isImportPresent(std::string fileContent)
 
 void Parser::parseMIBImportFile(std::string fileContent)
 {
+    parseDiminishedNodes(fileContent);
+    
+}
+
+void Parser::parseDiminishedNodes(std::string fileContent)
+{
     std::string nodeLine;
     std::string nodeName;
     unsigned int OID;
@@ -46,24 +52,24 @@ void Parser::parseMIBImportFile(std::string fileContent)
     {
         match = *it;
         nodeLine = match.str(0);
-        nodeName = parseLineForNodeNameInImport(nodeLine, nodeName);
-        OID = parseLineForOIDInImport(nodeLine, OID);
-        parseLineForParentNamesInImport(nodeLine, parentVector, vectorOID); 
+        nodeName = parseLineForNodeNameDiminished(nodeLine, nodeName);
+        OID = parseLineForOIDDiminished(nodeLine, OID);
+        parseLineForParentNamesDiminished(nodeLine, parentVector, vectorOID); 
         if (parentVector.size() != 1)
         {
             addParentNodes(parentVector, vectorOID);
-            m_pNode = addNodeFromImport(nodeName, OID, parentVector); 
+            m_pNode = addNodeOneOrMore(nodeName, OID, parentVector); 
         }
         else
         {
-            m_pNode = addNodeFromImport(nodeName, OID, parentVector);
+            m_pNode = addNodeOneOrMore(nodeName, OID, parentVector);
         }
         parentVector.clear();
         vectorOID.clear();
     }   
 }
 
-std::string Parser::parseLineForNodeNameInImport(std::string & nodeLine, std::string & nodeName)
+std::string Parser::parseLineForNodeNameDiminished(std::string & nodeLine, std::string & nodeName)
 {
     std::regex patternNodeName("(\\S*)\\s*OBJECT IDENTIFIER");
     std::regex patternCutNodeName("");
@@ -78,7 +84,7 @@ std::string Parser::parseLineForNodeNameInImport(std::string & nodeLine, std::st
     return "";
 }
 
-unsigned int Parser::parseLineForOIDInImport(std::string & nodeLine, unsigned int & OID)
+unsigned int Parser::parseLineForOIDDiminished(std::string & nodeLine, unsigned int & OID)
 {
     std::regex patternOID("(\\d)\\s\\}");
     std::smatch match;
@@ -90,7 +96,7 @@ unsigned int Parser::parseLineForOIDInImport(std::string & nodeLine, unsigned in
     return 0;
 }
 
-void Parser::parseLineForParentNamesInImport(std::string & nodeLine, std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID)
+void Parser::parseLineForParentNamesDiminished(std::string & nodeLine, std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID)
 {
     std::regex patternParentNames("\\s+?([^ \\{]\\S*)\\s+?\\d\\s*\\}");
     std::regex patternParentOID("\\((.)\\)");
@@ -112,7 +118,7 @@ void Parser::parseLineForParentNamesInImport(std::string & nodeLine, std::vector
         }
         else
         {
-            vectorOID.push_back(0);
+            vectorOID.push_back(1);
             parentVector.push_back(matchString);
         }
         cutString = std::regex_replace(cutString, patternCutBraceLeft, "\\(", std::regex_constants::format_first_only);
@@ -140,7 +146,7 @@ void Parser::addParentNodes(std::vector<std::string> & parentVector, std::vector
     }
 }
 
-Node * Parser::addNodeFromImport(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector)
+Node * Parser::addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector)
 {
     for (std::list<Node>::iterator it = m_pTree -> m_nodeList.begin(); it != m_pTree -> m_nodeList.end(); it++)
     {
@@ -153,9 +159,118 @@ Node * Parser::addNodeFromImport(std::string & nodeName, unsigned int & OID, std
     return m_pTree -> addNode(OID, nodeName, nullptr, "", Visibility::NONE, EncodingType::NONE, AccessType::NONE, StatusType::NONE, m_pNode);
 }
 
+void Parser::parseNodes(std::string fileContent)
+{
+    std::regex patternNode("\\n[^-]\\w+?\\sOBJECT-TYPE\\s*((.*\\n)*?)\\s*::= .*\\n");
+    std::smatch match;
+    std::string nodeString;
+    std::sregex_iterator begin(fileContent.cbegin(), fileContent.cend(), patternNode);
+    std::sregex_iterator end;
+    
+    std::string nodeName;
+    unsigned int OID;
+    AccessType accessType;
+    StatusType statusType;
+    std::string description;
+    Node * pParent= nullptr;
+    
+    for (std::sregex_iterator it = begin; it != end; it++)
+    {
+        match = *it;
+        nodeString = match.str(0);
+        parseNodeParameters(nodeString, nodeName, OID, accessType, statusType, description, &pParent);
+        addNode(nodeName, OID, accessType, statusType, description, &pParent);
+    }
+     
+}
+
+void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+{
+    std::regex pattern("(\\w+) OBJECT-TYPE");
+    std::smatch match;
+    
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        nodeName = match.str(1);
+    }
+    
+    pattern.assign("(\\d) \\}");
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        OID = std::stoi(match.str(1));
+    }
+    
+    pattern.assign("ACCESS  (.+)");
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        std::string accessString = match.str(1);
+        if (accessString == "read-only")
+        {
+            accessType = AccessType::READ_ONLY;
+        }
+        else if (accessString == "write-only")
+        {
+            accessType = AccessType::WRITE_ONLY;
+        }
+        else if (accessString == "read-write")
+        {
+            accessType = AccessType::READ_WRITE;    
+        }
+        else if (accessString == "not-accessible")
+        {
+            accessType = AccessType::NOT_ACCESSIBLE;
+        }
+    }
+    
+    pattern.assign("STATUS  (.+)");
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        
+        std::string statusString = match.str(1);
+        if (statusString == "mandatory")
+        {
+            statusType = StatusType::MANDATORY;
+        }
+        else if (statusString == "optional")
+        {
+            statusType = StatusType::OPTIONAL;
+        }
+        else if (statusString == "obsolete")
+        {
+            statusType = StatusType::OBSOLETE;    
+        }
+    }
+    
+    pattern.assign("\"(.+?((.*\\n)+).+?)\"\\n");
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        description = match.str(1);
+    }
+    
+    pattern.assign("\\{ (.+) \\d \\}");
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        std::string parentName = match.str(1);
+        for (std::list<Node>::iterator it = m_pTree -> m_nodeList.begin(); it != m_pTree -> m_nodeList.end(); it++)
+        {
+            if ((*it).m_name == parentName)
+            {
+                *pParent = &(*it);
+                break;
+            }
+        }
+    }
+}
+
+
+Node * Parser::addNode(std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+{
+    return m_pTree -> addNode(OID, nodeName, nullptr, description, Visibility::NONE, EncodingType::NONE, accessType, statusType, *pParent);
+}
+
 void Parser::parseMIBFile(std::string fileContent)
 {
-    parseMIBImportFile(fileContent);
-
+    parseDiminishedNodes(fileContent);
+    parseNodes(fileContent);
 }
 
