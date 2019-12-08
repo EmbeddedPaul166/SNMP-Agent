@@ -2,7 +2,6 @@
 
 Tree::Tree()
 {
-    initializeListOfDataTypes();
     initializeRootOfTheTree();
 }
 
@@ -45,14 +44,6 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
     }
     Node * pNewNode = &m_nodeList.back();
     return pNewNode;
-}
-
-void Tree::initializeListOfDataTypes()
-{
-    m_listOfDataTypes.push_back("INTEGER");
-    m_listOfDataTypes.push_back("OCTET STRING");
-    m_listOfDataTypes.push_back("OBJECT IDENTIFIER");
-    m_listOfDataTypes.push_back("NULL");
 }
 
 void Tree::initializeRootOfTheTree()
@@ -102,6 +93,19 @@ Node * Tree::findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID)
         std::cout << exception << std::endl;
         return nullptr;
     }
+}
+
+std::string * Tree::checkDataType(std::string dataType)
+{
+    for (std::vector<std::string>::size_type i = 0; i != m_dataTypeVector.size(); i++)
+    {
+        if (dataType == m_dataTypeVector[i])
+        {
+            return &m_dataTypeVector[i];
+        }
+    }
+    m_dataTypeVector.push_back(dataType);
+    return &m_dataTypeVector.back();
 }
 
 Node * Tree::findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name)
