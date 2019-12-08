@@ -190,19 +190,20 @@ void Parser::parseNodes(std::string fileContent)
     AccessType accessType;
     StatusType statusType;
     std::string description;
+    std::string * dataType = nullptr;
     Node * pParent = nullptr;
     
     for (std::sregex_iterator it = begin; it != end; it++)
     {
         match = *it;
         nodeString = match.str(0);
-        parseNodeParameters(nodeString, nodeName, OID, accessType, statusType, description, &pParent);
-        m_pNode = addNode(nodeName, OID, nullptr, accessType, statusType, description, &pParent);
+        parseNodeParameters(nodeString, nodeName, OID, &dataType, accessType, statusType, description, &pParent);
+        m_pNode = addNode(nodeName, OID, dataType, accessType, statusType, description, &pParent);
     }
      
 }
 
-void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string ** dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
     std::regex pattern("(\\w+) OBJECT-TYPE");
     std::smatch match;
@@ -216,6 +217,13 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
     if (std::regex_search(nodeString, match, pattern))
     {
         OID = std::stoi(match.str(1));
+    }
+    
+    pattern.assign("SYNTAX  ((.*\\n)*?)\\s* ACCESS");
+    if (std::regex_search(nodeString, match, pattern))
+    {
+        std::string type = match.str(1);
+        *dataType = m_pTree -> checkDataType(type);
     }
     
     pattern.assign("ACCESS  (.+)");

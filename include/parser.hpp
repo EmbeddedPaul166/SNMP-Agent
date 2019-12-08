@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include "tree.hpp"
-#include "datatype.hpp"
 
 class Parser
 {
@@ -27,7 +26,7 @@ class Parser
         Node * addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector);
         Node * addNode(std::string & nodeName, unsigned int & OID, std::string * dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         void parseNodes(std::string fileContent);
-        void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
+        void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string ** dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         std::vector<std::string> m_importList;
         std::vector<std::string> m_customDataTypeVector;
         std::unique_ptr<Tree> m_pTree; 
