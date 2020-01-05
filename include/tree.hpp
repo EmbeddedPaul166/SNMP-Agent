@@ -13,7 +13,7 @@ class Tree
         Tree();
         ~Tree();
         
-        Node * addNode(unsigned int objectIdentifier, std::string name, std::string * dataType,
+        Node * addNode(unsigned int objectIdentifier, std::string name, std::string dataType,
                        std::string description, AccessType accessType, StatusType statusType,
                        Node * pParentElement);
         Node * findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID); 

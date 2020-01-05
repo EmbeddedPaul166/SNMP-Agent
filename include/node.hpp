@@ -24,7 +24,7 @@ enum class StatusType
 class Node
 {
     public:
-        Node(unsigned int objectIdentifier, std::string name, std::string * dataType,
+        Node(unsigned int objectIdentifier, std::string name, std::string dataType,
              std::string description, AccessType accessType, StatusType statusType, Node * parentElement,
              std::list<Node *> childElementPointerList);
         Node();
@@ -32,7 +32,7 @@ class Node
         
         unsigned int m_objectIdentifier;
         std::string m_name;
-        std::string * m_dataType;
+        std::string m_dataType;
         std::string m_description;
         AccessType m_accessType;
         StatusType m_statusType;

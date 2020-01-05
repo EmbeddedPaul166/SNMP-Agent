@@ -36,14 +36,7 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         isNodeFound = true;
         OID = m_pNode -> m_objectIdentifier;
         name = m_pNode -> m_name;
-        if (m_pNode -> m_dataType == nullptr)
-        {
-            dataType = "None";
-        }
-        else
-        {
-            dataType = *(m_pNode -> m_dataType);
-        }
+        dataType = m_pNode -> m_dataType;
         description = m_pNode -> m_description;
         
         if (m_pNode -> m_accessType == AccessType::READ_ONLY)
@@ -64,7 +57,7 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         }
         else if (m_pNode -> m_accessType == AccessType::NONE)
         {
-            accessType = "None";
+            accessType = "";
         }
         
         if (m_pNode -> m_statusType == StatusType::MANDATORY)
@@ -81,7 +74,7 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         }
         else if (m_pNode -> m_statusType == StatusType::NONE)
         {
-            statusType = "None";  
+            statusType = "";  
         }
     }
 }
@@ -230,7 +223,7 @@ void Parser::addParentNodes(std::vector<std::string> & parentVector, std::vector
         }
         else
         {
-            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], nullptr, "", AccessType::NONE, StatusType::NONE, m_pNode);
+            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], "", "", AccessType::NONE, StatusType::NONE, m_pNode);
         }    
     }
 }
@@ -245,7 +238,7 @@ Node * Parser::addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std:
             break;
         }
     }
-    return m_pTree -> addNode(OID, nodeName, nullptr, "", AccessType::NONE, StatusType::NONE, m_pNode);
+    return m_pTree -> addNode(OID, nodeName, "", "", AccessType::NONE, StatusType::NONE, m_pNode);
 }
 
 void Parser::parseNodes(std::string fileContent)
@@ -261,20 +254,20 @@ void Parser::parseNodes(std::string fileContent)
     AccessType accessType;
     StatusType statusType;
     std::string description;
-    std::string * dataType = nullptr;
+    std::string  dataType;
     Node * pParent = nullptr;
     
     for (std::sregex_iterator it = begin; it != end; it++)
     {
         match = *it;
         nodeString = match.str(0);
-        dataType = parseNodeParameters(nodeString, nodeName, OID, dataType, accessType, statusType, description, &pParent);
+        parseNodeParameters(nodeString, nodeName, OID, dataType, accessType, statusType, description, &pParent);
         m_pNode = addNode(nodeName, OID, dataType, accessType, statusType, description, &pParent);
     }
      
 }
 
-std::string * Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string * dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string & dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
     std::regex pattern("(\\w+) OBJECT-TYPE");
     std::smatch match;
@@ -290,11 +283,10 @@ std::string * Parser::parseNodeParameters(std::string & nodeString, std::string 
         OID = std::stoi(match.str(1));
     }
     
-    pattern.assign("SYNTAX  ((.*\\n)*?)\\s* ACCESS");
+    pattern.assign("SYNTAX  ((.*\\n)*?)    ACCESS");
     if (std::regex_search(nodeString, match, pattern))
     {
-        std::string type = match.str(1);
-        dataType = m_pTree -> checkDataType(type);
+        dataType = match.str(1);
     }
     
     pattern.assign("ACCESS  (.+)");
@@ -357,11 +349,10 @@ std::string * Parser::parseNodeParameters(std::string & nodeString, std::string 
             }
         }
     }
-    return dataType;
 }
 
 
-Node * Parser::addNode(std::string & nodeName, unsigned int & OID, std::string * dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+Node * Parser::addNode(std::string & nodeName, unsigned int & OID, std::string & dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
     return m_pTree -> addNode(OID, nodeName, dataType, description, accessType, statusType, *pParent);
 }

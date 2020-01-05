@@ -1,6 +1,6 @@
 #include "node.hpp"
 
-Node::Node(unsigned int objectIdentifier, std::string name, std::string * dataType,
+Node::Node(unsigned int objectIdentifier, std::string name, std::string dataType,
            std::string description, AccessType accessType, StatusType statusType, Node * pParentElement,
            std::list<Node *> childElementPointerList)
 {
