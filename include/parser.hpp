@@ -16,6 +16,14 @@ class Parser
         std::string isImportPresent(std::string fileContent);
         void parseMIBImportFile(std::string fileContent);
         void parseMIBFile(std::string fileContent);
+        void getNodeByOID(std::vector<unsigned int> vectorOfOID,
+                          bool & isNodeFound,
+                          unsigned int & OID,
+                          std::string & name,
+                          std::string & dataType,
+                          std::string & description,
+                          std::string & accessType,
+                          std::string & statusType);
         
     private: 
         void parseDiminishedNodes(std::string fileContent);
@@ -26,7 +34,7 @@ class Parser
         Node * addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector);
         Node * addNode(std::string & nodeName, unsigned int & OID, std::string * dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         void parseNodes(std::string fileContent);
-        void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string ** dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
+        std::string * parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string * dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         std::vector<std::string> m_importList;
         std::vector<std::string> m_customDataTypeVector;
         std::unique_ptr<Tree> m_pTree; 

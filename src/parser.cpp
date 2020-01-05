@@ -15,6 +15,77 @@ Parser::~Parser()
     
 }
 
+
+void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
+                          bool & isNodeFound,
+                          unsigned int & OID,
+                          std::string & name,
+                          std::string & dataType,
+                          std::string & description,
+                          std::string & accessType,
+                          std::string & statusType)
+{
+    m_pNode = m_pTree -> findNodeByObjectIdentifier(vectorOfOID);
+    
+    if (m_pNode == nullptr)
+    {
+        isNodeFound = false;
+    }
+    else
+    {
+        isNodeFound = true;
+        OID = m_pNode -> m_objectIdentifier;
+        name = m_pNode -> m_name;
+        if (m_pNode -> m_dataType == nullptr)
+        {
+            dataType = "None";
+        }
+        else
+        {
+            dataType = *(m_pNode -> m_dataType);
+        }
+        description = m_pNode -> m_description;
+        
+        if (m_pNode -> m_accessType == AccessType::READ_ONLY)
+        {
+            accessType = "Read only";
+        }
+        else if (m_pNode -> m_accessType == AccessType::WRITE_ONLY)
+        {
+            accessType = "Write Only";
+        }
+        else if (m_pNode -> m_accessType == AccessType::READ_WRITE)
+        {
+            accessType = "Read write";
+        }
+        else if (m_pNode -> m_accessType == AccessType::NOT_ACCESSIBLE)
+        {
+            accessType = "Not accessible";
+        }
+        else if (m_pNode -> m_accessType == AccessType::NONE)
+        {
+            accessType = "None";
+        }
+        
+        if (m_pNode -> m_statusType == StatusType::MANDATORY)
+        {
+            statusType = "Mandatory";  
+        }
+        else if (m_pNode -> m_statusType == StatusType::OPTIONAL)
+        {
+            statusType = "Optional";
+        }
+        else if (m_pNode -> m_statusType == StatusType::OBSOLETE)
+        {
+            statusType = "Obsolete";  
+        }
+        else if (m_pNode -> m_statusType == StatusType::NONE)
+        {
+            statusType = "None";  
+        }
+    }
+}
+
 std::string Parser::isImportPresent(std::string fileContent)
 { 
     std::smatch match;
@@ -105,7 +176,7 @@ std::string Parser::parseLineForNodeNameDiminished(std::string & nodeLine, std::
 
 unsigned int Parser::parseLineForOIDDiminished(std::string & nodeLine, unsigned int & OID)
 {
-    std::regex patternOID("(\\d)\\s\\}");
+    std::regex patternOID("(\\d+)\\s\\}");
     std::smatch match;
     if (std::regex_search(nodeLine, match, patternOID))
     {
@@ -197,13 +268,13 @@ void Parser::parseNodes(std::string fileContent)
     {
         match = *it;
         nodeString = match.str(0);
-        parseNodeParameters(nodeString, nodeName, OID, &dataType, accessType, statusType, description, &pParent);
+        dataType = parseNodeParameters(nodeString, nodeName, OID, dataType, accessType, statusType, description, &pParent);
         m_pNode = addNode(nodeName, OID, dataType, accessType, statusType, description, &pParent);
     }
      
 }
 
-void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string ** dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+std::string * Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string * dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
     std::regex pattern("(\\w+) OBJECT-TYPE");
     std::smatch match;
@@ -223,7 +294,7 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
     if (std::regex_search(nodeString, match, pattern))
     {
         std::string type = match.str(1);
-        *dataType = m_pTree -> checkDataType(type);
+        dataType = m_pTree -> checkDataType(type);
     }
     
     pattern.assign("ACCESS  (.+)");
@@ -286,6 +357,7 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
             }
         }
     }
+    return dataType;
 }
 
 

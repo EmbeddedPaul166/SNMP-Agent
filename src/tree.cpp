@@ -16,7 +16,8 @@ Node * Tree::addNode(unsigned int objectIdentifier, std::string name, std::strin
 { 
     std::list <Node *> emptyChildList;
     emptyChildList.clear();
-    Node newNode(objectIdentifier, name, dataType, description, accessType, statusType, pParentElement, emptyChildList);
+    
+    Node newNode(objectIdentifier, name, dataType, description, accessType, statusType, pParentElement, emptyChildList);    
     
     m_nodeList.push_back(newNode);
     
@@ -54,21 +55,23 @@ void Tree::initializeRootOfTheTree()
     m_rootOfTheTree = &m_nodeList.back();
 }
 
-//Call this function with as such 'recursiveSearch(vector, 0, m_rootOfTheTree)' !!!
+//Call this function with as such 'recursiveSearch(vector, 1, m_rootOfTheTree)' !!!
 //This function should be called inside try catch block and if it returns nullptr it should throw exception!!!
 Node * Tree::recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int vectorPosition, Node * node)
 {
     std::list<Node *> & childList = node -> m_childElementPointerList;
     for (std::list<Node *>::iterator it = childList.begin(); it != childList.end(); it++)
     {   
-        if ((*it) -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition) && vectorOfOID.size() - 1 == vectorPosition)
+        unsigned int currentOID = (*it) -> m_objectIdentifier;
+        if (currentOID ==  vectorOfOID.at(vectorPosition) && vectorOfOID.size() - 1 == vectorPosition)
         {
             return (*it);        
         }
         else if ((*it) -> m_objectIdentifier ==  vectorOfOID.at(vectorPosition))
         {
             vectorPosition++;
-            recursiveSearch(vectorOfOID, vectorPosition, (*it));
+            Node * pNode = recursiveSearch(vectorOfOID, vectorPosition, (*it));
+            return pNode;
         }
     } 
     return nullptr;
@@ -76,22 +79,18 @@ Node * Tree::recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int
 
 Node * Tree::findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID)
 {
-    try
+    if (vectorOfOID.front() != 1)
     {
-        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
-        if (pNode == nullptr)
-        {
-            throw "Node not found";
-        }
-        else
-        {
-            return pNode;    
-        }
-    }
-    catch(std::string exception)
-    {
-        std::cout << exception << std::endl;
         return nullptr;
+    }
+    else
+    {
+        if (vectorOfOID.size() == 1)
+        {
+            return m_rootOfTheTree;
+        }
+        Node * pNode = recursiveSearch(vectorOfOID, 1, m_rootOfTheTree); 
+        return pNode;    
     }
 }
 
@@ -112,7 +111,7 @@ Node * Tree::findNodeByName(std::vector<unsigned int> vectorOfOID, std::string n
 {
     try
     {
-        Node * pNode = recursiveSearch(vectorOfOID, 0, m_rootOfTheTree);
+        Node * pNode = recursiveSearch(vectorOfOID, 1, m_rootOfTheTree);
         if (pNode == nullptr)
         {
             throw "Node not found";
