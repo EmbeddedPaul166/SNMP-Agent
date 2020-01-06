@@ -29,6 +29,7 @@ class Parser
     private: 
         void parseDiminishedNodes(std::string fileContent);
         void parseCustomDataTypesInImport(std::string fileContent);
+        void parseCustomDataTypesInMain(std::string fileContent);
         std::string parseLineForNodeNameDiminished(std::string & nodeLine, std::string & nodeName);
         unsigned int parseLineForOIDDiminished(std::string & nodeLine, unsigned int & OID);
         void parseLineForParentNamesDiminished(std::string & nodeLine, std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID);

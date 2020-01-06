@@ -384,8 +384,48 @@ Node * Parser::addNode(std::string & nodeName, unsigned int & OID, std::string &
     return m_pTree -> addNode(OID, nodeName, dataType, newDataType, baseType, complexity, visibility, lengthLimit, description, accessType, statusType, *pParent);
 }
 
+void Parser::parseCustomDataTypesInMain(std::string fileContent)
+{
+    std::smatch match;
+    
+    std::string patternOneString ="\\w* ::=\\n\\s*.*[^{]\\n";
+    std::string patternTwoString = "\\w* ::=\\n\\s*SEQUENCE((.*\\n)*?)\\s*}";
+    std::string patternThreeString = "\\w* ::=\\n\\s*CHOICE((.*\\n)*?)\\s*}";
+    
+    std::regex patternOne(patternOneString);
+    std::regex patternTwo(patternTwoString);
+    std::regex patternThree(patternThreeString);
+    
+    std::sregex_iterator beginOne(fileContent.cbegin(), fileContent.cend(), patternOne);
+    
+    std::sregex_iterator beginTwo(fileContent.cbegin(), fileContent.cend(), patternTwo);
+    
+    std::sregex_iterator beginThree(fileContent.cbegin(), fileContent.cend(), patternThree);
+    
+    std::sregex_iterator end;
+    
+    for (std::sregex_iterator it = beginOne; it != end; it++)
+    {
+        match = *it;
+        m_customDataTypeStringVector.push_back(match.str(0));
+    }
+    
+    for (std::sregex_iterator it = beginTwo; it != end; it++)
+    {
+        match = *it;
+        m_customDataTypeStringVector.push_back(match.str(0));
+    }
+    
+    for (std::sregex_iterator it = beginThree; it != end; it++)
+    {
+        match = *it;
+        m_customDataTypeStringVector.push_back(match.str(0));
+    }
+}
+
 void Parser::parseMIBFile(std::string fileContent)
 {
+    parseCustomDataTypesInMain(fileContent);
     parseDiminishedNodes(fileContent);
     parseNodes(fileContent);
 }
