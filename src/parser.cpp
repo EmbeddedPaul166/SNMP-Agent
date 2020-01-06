@@ -423,9 +423,59 @@ void Parser::parseCustomDataTypesInMain(std::string fileContent)
     }
 }
 
+void Parser::parseCustomDataTypeInformation()
+{
+    
+    std::smatch match; 
+    std::regex patternSequence("SEQUENCE");
+    std::regex patternChoice("CHOICE");
+    std::regex patternInteger("::=\\n\\s*INTEGER");
+    std::regex patternOctetString("::=\\n\\s*OCTET STRING");
+    std::regex patternObjectIdentifier("::=\\n\\s*OBJECT IDENTIFIER");
+    std::regex patternNULL("::=\\n\\s*NULL");
+    
+    m_customDataTypeVector.clear();
+    
+    for (std::vector<std::string>::size_type i = m_customDataTypeStringVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
+    {
+        //Get all names in the right sequence
+        //Get all parameters(newDataType, baseType, complexity(if no explicit/implicit, use universal), visibility, lengthLimit)
+        std::string & dataString = m_customDataTypeStringVector[i];
+        
+        if (std::regex_search(dataString, match, patternSequence))
+        {
+             //Constructed, sequence type
+             //Parse for sequence elements
+        }
+        else if (std::regex_search(dataString, match, patternChoice))
+        {
+            //Constructed, choice type
+            //Parse for choice elements
+        }
+        else if (std::regex_search(dataString, match, patternInteger))
+        {
+            //Primitive type, integer
+        }
+        else if (std::regex_search(dataString, match, patternOctetString))
+        {
+            //Primitive type, octet string
+        }
+        else if (std::regex_search(dataString, match, patternObjectIdentifier))
+        {
+            //Primitive type, object identifier
+        }
+        else if (std::regex_search(dataString, match, patternNULL))
+        {
+            //Primitive type, null
+        }
+        
+    }
+}
+
 void Parser::parseMIBFile(std::string fileContent)
 {
     parseCustomDataTypesInMain(fileContent);
+    getCustomDataTypeNames();
     parseDiminishedNodes(fileContent);
     parseNodes(fileContent);
 }
