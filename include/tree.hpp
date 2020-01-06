@@ -13,8 +13,9 @@ class Tree
         Tree();
         ~Tree();
         
-        Node * addNode(unsigned int objectIdentifier, std::string name, std::string dataType,
-                       std::string description, AccessType accessType, StatusType statusType,
+        Node * addNode(unsigned int objectIdentifier, std::string name, std::string dataType, NewDataType newDataType,
+                       BaseDataType baseType, EncodingComplexity complexity, DataVisibility visibility,
+                       unsigned int lengthLimit,std::string description, AccessType accessType, StatusType statusType,
                        Node * pParentElement);
         Node * findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID); 
         Node * findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name);

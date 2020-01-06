@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "tree.hpp"
+#include "node.hpp"
 
 class Parser
 {
@@ -32,9 +33,11 @@ class Parser
         void parseLineForParentNamesDiminished(std::string & nodeLine, std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID);
         void addParentNodes(std::vector<std::string> & parentVector, std::vector<unsigned int> & vectorOID);
         Node * addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector);
-        Node * addNode(std::string & nodeName, unsigned int & OID, std::string & dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
+        Node * addNode(std::string & nodeName, unsigned int & OID, std::string & dataType, NewDataType & newDataType, BaseDataType & baseType, EncodingComplexity & complexity, DataVisibility & visibility,
+                       unsigned int & lengthLimit, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         void parseNodes(std::string fileContent);
-        void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string & dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
+        void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string & dataType, NewDataType & newDataType, BaseDataType & baseType, EncodingComplexity & complexity,
+                                 DataVisibility & visibility, unsigned int & lengthLimit, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent);
         std::vector<std::string> m_importList;
         std::vector<std::string> m_customDataTypeVector;
         std::unique_ptr<Tree> m_pTree; 

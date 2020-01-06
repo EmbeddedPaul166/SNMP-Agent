@@ -1,8 +1,7 @@
 #include <cstdlib>
 #include "parser.hpp"
 
-//TODO: replace regex_replace with sregex_iterator
-//TODO: add main node data-type parsing and parse special sequence data type nodes
+//TODO: add data type parsing
 
 Parser::Parser()
 {
@@ -223,7 +222,7 @@ void Parser::addParentNodes(std::vector<std::string> & parentVector, std::vector
         }
         else
         {
-            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], "", "", AccessType::NONE, StatusType::NONE, m_pNode);
+            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], "", NewDataType::NO, BaseDataType::NULL_D, EncodingComplexity::PRIMITIVE, DataVisibility::UNIVERSAL, 0, "", AccessType::NONE, StatusType::NONE, m_pNode);
         }    
     }
 }
@@ -238,7 +237,7 @@ Node * Parser::addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std:
             break;
         }
     }
-    return m_pTree -> addNode(OID, nodeName, "", "", AccessType::NONE, StatusType::NONE, m_pNode);
+    return m_pTree -> addNode(OID, nodeName, "", NewDataType::NO, BaseDataType::NULL_D, EncodingComplexity::PRIMITIVE, DataVisibility::UNIVERSAL, 0, "", AccessType::NONE, StatusType::NONE, m_pNode);
 }
 
 void Parser::parseNodes(std::string fileContent)
@@ -255,19 +254,25 @@ void Parser::parseNodes(std::string fileContent)
     StatusType statusType;
     std::string description;
     std::string  dataType;
+    NewDataType newDataType;
+    BaseDataType baseType;
+    EncodingComplexity complexity;
+    DataVisibility visibility;
+    unsigned int lengthLimit;
     Node * pParent = nullptr;
     
     for (std::sregex_iterator it = begin; it != end; it++)
     {
         match = *it;
         nodeString = match.str(0);
-        parseNodeParameters(nodeString, nodeName, OID, dataType, accessType, statusType, description, &pParent);
-        m_pNode = addNode(nodeName, OID, dataType, accessType, statusType, description, &pParent);
+        parseNodeParameters(nodeString, nodeName, OID, dataType, newDataType, baseType, complexity, visibility, lengthLimit, accessType, statusType, description, &pParent);
+        m_pNode = addNode(nodeName, OID, dataType, newDataType, baseType, complexity, visibility, lengthLimit, accessType, statusType, description, &pParent);
     }
      
 }
 
-void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string & dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string & dataType, NewDataType & newDataType, BaseDataType & baseType, EncodingComplexity & complexity,
+                                 DataVisibility & visibility, unsigned int & lengthLimit, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
     std::regex pattern("(\\w+) OBJECT-TYPE");
     std::smatch match;
@@ -352,9 +357,10 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
 }
 
 
-Node * Parser::addNode(std::string & nodeName, unsigned int & OID, std::string & dataType, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+Node * Parser::addNode(std::string & nodeName, unsigned int & OID, std::string & dataType, NewDataType & newDataType, BaseDataType & baseType, EncodingComplexity & complexity, DataVisibility & visibility,
+                       unsigned int & lengthLimit, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
 {
-    return m_pTree -> addNode(OID, nodeName, dataType, description, accessType, statusType, *pParent);
+    return m_pTree -> addNode(OID, nodeName, dataType, newDataType, baseType, complexity, visibility, lengthLimit, description, accessType, statusType, *pParent);
 }
 
 void Parser::parseMIBFile(std::string fileContent)
