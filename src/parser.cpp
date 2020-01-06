@@ -2,7 +2,7 @@
 #include "parser.hpp"
 
 //TODO: add data type parsing
-
+//TODO: exclude mgmt custom data type in an intelligent way
 Parser::Parser()
 {
     m_pNode = nullptr;
@@ -112,10 +112,31 @@ std::string Parser::isImportPresent(std::string fileContent)
     return "";
 }
 
+void Parser::parseCustomDataTypesInImport(std::string fileContent)
+{ 
+    std::smatch match;
+    
+    for (std::vector<std::string>::size_type i = m_customDataTypeVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
+    {
+        std::string patternOneString = m_customDataTypeVector[i] + " ::=\\n\\s*.*\\n\\s*.*";
+        std::string patternTwoString = m_customDataTypeVector[i] + " ::=\\n\\s*((.*\\n)*?)\\s*}";
+        std::regex patternOne(patternOneString);
+        std::regex patternTwo(patternTwoString);
+        if (std::regex_search(fileContent, match, patternOne))
+        {
+            m_customDataTypeStringVector.push_back(match.str(0)); 
+        }
+        else if (std::regex_search(fileContent, match, patternTwo))
+        {
+            m_customDataTypeStringVector.push_back(match.str(0)); 
+        }
+    } 
+}
+
 void Parser::parseMIBImportFile(std::string fileContent)
 {
-    parseDiminishedNodes(fileContent);
-    
+    parseDiminishedNodes(fileContent); 
+    parseCustomDataTypesInImport(fileContent);
 }
 
 void Parser::parseDiminishedNodes(std::string fileContent)
