@@ -545,7 +545,7 @@ void Parser::parseCustomDataTypeInformation()
     std::regex patternPrivate("PRIVATE");
     
     std::regex patternSingleElementSequence("\\s*(\\w*?[^{},=])\\n\\s*.*?[^{}]\\n");
-    std::regex patternSingleElementChoice("\\s*(\\w*)\\n"); //Fix this!!!
+    std::regex patternSingleElementChoice("(\\w+)\\n");
     
     DataType dataType;
     
