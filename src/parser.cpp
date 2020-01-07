@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include "parser.hpp"
 
-//TODO: Complete custom data type parsing
-//TODO: Add node data type parsing
+//TODO: Check what is the number in types like these: [APPLICATION X], where X is the number
+//TODO: Coder api
 
 Parser::Parser()
 {
@@ -25,6 +25,7 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
                           std::string & encodingType,
                           std::string & visibility,
                           unsigned int & lengthLimit,
+                          unsigned int & rangeLimit,
                           std::string & description,
                           std::string & accessType,
                           std::string & statusType)
@@ -124,6 +125,8 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         }
         
         lengthLimit = dataType.m_lengthLimit;
+        
+        rangeLimit = dataType.m_rangeLimit;
         
         description = m_pNode -> m_description;
         if (description == "")
@@ -483,6 +486,111 @@ Node * Parser::addNode(std::string & nodeName, unsigned int & OID, DataType & da
 DataType Parser::parseDataType(std::string & dataTypeString)
 {
     DataType dataType;
+    std::regex patternName("\\w+");
+    std::regex patternSequenceObject("(\\w+)\\n");
+    std::regex patternBrace("\\(SIZE (.*?)\\)\\)");
+    std::regex patternBraceTwo(" (.*?)\\)");
+    std::regex patternInteger("INTEGER");
+    std::regex patternOctetString("OCTET STRING");
+    std::regex patternObjectIdentifier("OBJECT IDENTIFIER");
+    std::regex patternNULL("NULL");
+    std::smatch match;
+    
+    if (std::regex_search(dataTypeString, match, patternName))
+    {
+        std::string name = match.str(0);
+        if (name == "SEQUENCE")
+        {
+            dataType.m_baseType = BaseDataType::SEQUENCE_OF;
+            if (std::regex_search(dataTypeString, match, patternSequenceObject))
+            {
+                dataType.m_nodeNameList.push_back(match.str(1));
+            }
+            else
+            {
+                dataType.m_nodeNameList.push_back("Error");
+            }
+        }
+        else if (std::regex_search(dataTypeString, match, patternInteger))
+        {
+            dataType.m_baseType = BaseDataType::INTEGER;
+            if (std::regex_search(dataTypeString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataTypeString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
+        }
+        else if (std::regex_search(dataTypeString, match, patternOctetString))
+        {
+            dataType.m_baseType = BaseDataType::OCTET_STRING;   
+            if (std::regex_search(dataTypeString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataTypeString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
+        }
+        else if (std::regex_search(dataTypeString, match, patternObjectIdentifier))
+        {
+            dataType.m_baseType = BaseDataType::OBJECT_IDENTIFIER;    
+            if (std::regex_search(dataTypeString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataTypeString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
+        }
+        else if (std::regex_search(dataTypeString, match, patternNULL))
+        {
+            dataType.m_baseType = BaseDataType::NULL_D;   
+            if (std::regex_search(dataTypeString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataTypeString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
+        }
+        else
+        {
+            for (std::vector<std::string>::size_type i = m_customDataTypeNameVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
+            {
+                if (m_customDataTypeNameVector[i] == name)
+                {
+                    dataType = m_customDataTypeVector[i];
+                }
+         
+                if (std::regex_search(dataTypeString, match, patternBrace))
+                {
+                    std::stringstream conv(match.str(1));     
+                    conv >> dataType.m_lengthLimit;
+                }
+                else if (std::regex_search(dataTypeString, match, patternBraceTwo))
+                {
+                    std::stringstream conv(match.str(1));     
+                    conv >> dataType.m_rangeLimit;
+                }
+            }
+        }
+    }
+    
+    
     return dataType;
 }
 
@@ -531,10 +639,14 @@ void Parser::parseCustomDataTypeInformation()
     std::regex patternName("(\\w*) ::=");
     std::regex patternSequence("SEQUENCE");
     std::regex patternChoice("CHOICE");
-    std::regex patternInteger("::=\\n\\s*INTEGER");
-    std::regex patternOctetString("::=\\n\\s*OCTET STRING");
-    std::regex patternObjectIdentifier("::=\\n\\s*OBJECT IDENTIFIER");
-    std::regex patternNULL("::=\\n\\s*NULL");
+    
+    std::regex patternBrace("(\\d+)\\)\\)");
+    std::regex patternBraceTwo("(\\d+)\\)");
+    
+    std::regex patternInteger("INTEGER");
+    std::regex patternOctetString("OCTET STRING");
+    std::regex patternObjectIdentifier("OBJECT IDENTIFIER");
+    std::regex patternNULL("NULL");
     
     std::regex patternImplicit("IMPLICIT");
     std::regex patternExplicit("EXPLICIT");
@@ -570,7 +682,7 @@ void Parser::parseCustomDataTypeInformation()
             for (std::sregex_iterator it = beginS; it != endS; it++)
             {
                 match = *it;
-                dataType.nodeNameList.push_back(match.str(1));
+                dataType.m_nodeNameList.push_back(match.str(1));
             }
         }
         else if (std::regex_search(dataString, match, patternChoice))
@@ -582,7 +694,7 @@ void Parser::parseCustomDataTypeInformation()
             for (std::sregex_iterator it = beginC; it != endC; it++)
             {
                 match = *it;
-                dataType.nodeNameList.push_back(match.str(1));
+                dataType.m_nodeNameList.push_back(match.str(1));
             }
         
         }
@@ -590,21 +702,61 @@ void Parser::parseCustomDataTypeInformation()
         {
             dataType.m_baseType = BaseDataType::INTEGER;
             dataType.m_complexity = EncodingComplexity::PRIMITIVE;
+            if (std::regex_search(dataString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
         }
         else if (std::regex_search(dataString, match, patternOctetString))
         {
             dataType.m_baseType = BaseDataType::OCTET_STRING;
             dataType.m_complexity = EncodingComplexity::PRIMITIVE;
+            if (std::regex_search(dataString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
         }
         else if (std::regex_search(dataString, match, patternObjectIdentifier))
         {
             dataType.m_baseType = BaseDataType::OBJECT_IDENTIFIER;
             dataType.m_complexity = EncodingComplexity::PRIMITIVE;
+            if (std::regex_search(dataString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
         }
         else
         {
             dataType.m_baseType = BaseDataType::NULL_D;
             dataType.m_complexity = EncodingComplexity::PRIMITIVE;
+            if (std::regex_search(dataString, match, patternBrace))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_lengthLimit;
+            }
+            else if (std::regex_search(dataString, match, patternBraceTwo))
+            {
+                std::stringstream conv(match.str(1));     
+                conv >> dataType.m_rangeLimit;
+            }
         }
         
         if (std::regex_search(dataString, match, patternImplicit))

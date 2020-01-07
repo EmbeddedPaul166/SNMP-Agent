@@ -2,6 +2,8 @@
 #define PARSER_HPP
 
 #include <regex>
+#include <sstream>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,6 +29,7 @@ class Parser
                           std::string & encodingType,
                           std::string & visibility,
                           unsigned int & lengthLimit,
+                          unsigned int & rangeLimit,
                           std::string & description,
                           std::string & accessType,
                           std::string & statusType);

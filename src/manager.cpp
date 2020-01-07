@@ -71,6 +71,7 @@ void Manager::getNodeByOID(std::string & input)
     std::string encodingType;
     std::string visibility;
     unsigned int lengthLimit;
+    unsigned int rangeLimit;
     std::string description;
     std::string accessType;
     std::string statusType;
@@ -83,6 +84,7 @@ void Manager::getNodeByOID(std::string & input)
                               encodingType,
                               visibility,
                               lengthLimit,
+                              rangeLimit,
                               description,
                               accessType,
                               statusType);
@@ -95,6 +97,7 @@ void Manager::getNodeByOID(std::string & input)
         std::cout << "Encoding type: " << encodingType << std::endl;
         std::cout << "Visibility: " << visibility << std::endl;
         std::cout << "Length limit: " << lengthLimit << std::endl;
+        std::cout << "Range limit: " << rangeLimit << std::endl;
         std::cout << "Description: " << description << std::endl;
         std::cout << "Access type: " << accessType << std::endl;
         std::cout << "Status type: " << statusType << std::endl; 
