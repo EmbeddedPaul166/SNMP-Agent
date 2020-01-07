@@ -8,6 +8,7 @@
 #include <cmath>
 #include "parser.hpp"
 #include "filehandler.hpp"
+#include "coder.hpp"
 
 class Manager
 {
@@ -22,6 +23,7 @@ class Manager
         std::vector<unsigned int> getOIDVector(std::string & input);
         std::unique_ptr<Parser> m_pParser;
         std::unique_ptr<FileHandler> m_pFileHandler;
+        std::unique_ptr<Coder> m_pCoder;
         
     
     protected:

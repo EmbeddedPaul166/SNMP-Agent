@@ -4,6 +4,7 @@ Manager::Manager()
 {
     m_pParser = std::make_unique<Parser>();
     m_pFileHandler = std::make_unique<FileHandler>();
+    m_pCoder = std::make_unique<Coder>();
 }
 
 Manager::~Manager()
