@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "node.hpp"
+#include "datatype.hpp"
 
 class Tree
 {
@@ -13,17 +14,14 @@ class Tree
         Tree();
         ~Tree();
         
-        Node * addNode(unsigned int objectIdentifier, std::string name, std::string dataType, NewDataType newDataType,
-                       BaseDataType baseType, EncodingComplexity complexity, DataVisibility visibility,
-                       unsigned int lengthLimit,std::string description, AccessType accessType, StatusType statusType,
+        Node * addNode(unsigned int objectIdentifier, std::string name, DataType dataType, std::string description, AccessType accessType, StatusType statusType,
                        Node * pParentElement);
         Node * findNodeByObjectIdentifier(std::vector<unsigned int> vectorOfOID); 
-        Node * findNodeByName(std::vector<unsigned int> vectorOfOID, std::string name);
-        std::string * checkDataType(std::string dataType);
+        Node * findNodeByName(std::string name);
    
         Node * m_rootOfTheTree;
         std::list<Node> m_nodeList;
-        std::vector<std::string> m_dataTypeVector;
+        std::vector<DataType> m_dataTypeVector;
         
     private:
         Node * recursiveSearch(std::vector<unsigned int> vectorOfOID, unsigned int vectorPosition, Node * node);

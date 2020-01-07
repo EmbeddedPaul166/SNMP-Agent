@@ -66,7 +66,11 @@ void Manager::getNodeByOID(std::string & input)
     bool isNodeFound;
     unsigned int OID;
     std::string name;
-    std::string dataType;
+    std::string baseType;
+    std::string complexity;
+    std::string encodingType;
+    std::string visibility;
+    unsigned int lengthLimit;
     std::string description;
     std::string accessType;
     std::string statusType;
@@ -74,7 +78,11 @@ void Manager::getNodeByOID(std::string & input)
                               isNodeFound,
                               OID,
                               name,
-                              dataType,
+                              baseType,
+                              complexity,
+                              encodingType,
+                              visibility,
+                              lengthLimit,
                               description,
                               accessType,
                               statusType);
@@ -82,7 +90,11 @@ void Manager::getNodeByOID(std::string & input)
     {
         std::cout << "OID: " << OID << std::endl;
         std::cout << "Name: " << name << std::endl;
-        std::cout << "Data type: " << dataType << std::endl;
+        std::cout << "Base type: " << baseType << std::endl;
+        std::cout << "Encoding complexity: " << complexity << std::endl;
+        std::cout << "Encoding type: " << encodingType << std::endl;
+        std::cout << "Visibility: " << visibility << std::endl;
+        std::cout << "Length limit: " << lengthLimit << std::endl;
         std::cout << "Description: " << description << std::endl;
         std::cout << "Access type: " << accessType << std::endl;
         std::cout << "Status type: " << statusType << std::endl; 

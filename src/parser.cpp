@@ -1,8 +1,9 @@
 #include <cstdlib>
 #include "parser.hpp"
 
-//TODO: add data type parsing
-//TODO: exclude mgmt custom data type in an intelligent way
+//TODO: Complete custom data type parsing
+//TODO: Add node data type parsing
+
 Parser::Parser()
 {
     m_pNode = nullptr;
@@ -19,7 +20,11 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
                           bool & isNodeFound,
                           unsigned int & OID,
                           std::string & name,
-                          std::string & dataType,
+                          std::string & baseType,
+                          std::string & complexity,
+                          std::string & encodingType,
+                          std::string & visibility,
+                          unsigned int & lengthLimit,
                           std::string & description,
                           std::string & accessType,
                           std::string & statusType)
@@ -35,8 +40,96 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         isNodeFound = true;
         OID = m_pNode -> m_objectIdentifier;
         name = m_pNode -> m_name;
-        dataType = m_pNode -> m_dataType;
+        
+        DataType & dataType = m_pNode -> m_dataType;
+        if (dataType.m_baseType == BaseDataType::INTEGER)
+        {
+            baseType = "Integer";
+        }
+        else if (dataType.m_baseType == BaseDataType::OCTET_STRING)
+        {
+            baseType = "Octet string";
+        }
+        else if (dataType.m_baseType == BaseDataType::OBJECT_IDENTIFIER)
+        {
+            baseType = "Object identifier";
+        }
+        else if (dataType.m_baseType == BaseDataType::NULL_D)
+        {
+            baseType = "Null";
+        }
+        else if (dataType.m_baseType == BaseDataType::SEQUENCE)
+        {
+            baseType = "Sequence";
+        }
+        else if (dataType.m_baseType == BaseDataType::CHOICE)
+        {
+            baseType = "Choice";
+        }
+        else
+        {
+            baseType = "Error";
+        }
+
+        
+        if (dataType.m_complexity == EncodingComplexity::PRIMITIVE)
+        {
+            complexity = "Primitive";
+        }
+        else if (dataType.m_complexity == EncodingComplexity::CONSTRUCTED)
+        {
+            complexity = "Constructed";
+        }
+        else
+        {
+            complexity = "Error";
+        }
+        
+        if (dataType.m_encodingType == EncodingType::UNIVERSAL)
+        {
+            encodingType = "Universal";
+        }
+        else if (dataType.m_encodingType == EncodingType::IMPLICIT)
+        {
+            encodingType = "Implicit";
+        }
+        else if (dataType.m_encodingType == EncodingType::EXPLICIT)
+        {
+            encodingType = "Explicit";
+        }
+        else
+        {
+            encodingType = "Error";
+        }
+        
+        if (dataType.m_visibility == DataVisibility::UNIVERSAL)
+        {
+            visibility = "Universal";
+        }
+        else if (dataType.m_visibility == DataVisibility::APPLICATION)
+        {
+            visibility = "Application";
+        }
+        else if (dataType.m_visibility == DataVisibility::CONTEXT_SPECIFIC)
+        {
+            visibility = "Context specific";
+        }
+        else if (dataType.m_visibility == DataVisibility::PRIVATE)
+        {
+            visibility = "Private";
+        }
+        else
+        {
+            visibility = "Error";
+        }
+        
+        lengthLimit = dataType.m_lengthLimit;
+        
         description = m_pNode -> m_description;
+        if (description == "")
+        {
+            description = "None";
+        }
         
         if (m_pNode -> m_accessType == AccessType::READ_ONLY)
         {
@@ -54,9 +147,9 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         {
             accessType = "Not accessible";
         }
-        else if (m_pNode -> m_accessType == AccessType::NONE)
+        else
         {
-            accessType = "";
+            accessType = "Error";
         }
         
         if (m_pNode -> m_statusType == StatusType::MANDATORY)
@@ -71,9 +164,9 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         {
             statusType = "Obsolete";  
         }
-        else if (m_pNode -> m_statusType == StatusType::NONE)
+        else
         {
-            statusType = "";  
+            statusType = "Error";
         }
     }
 }
@@ -97,7 +190,7 @@ std::string Parser::isImportPresent(std::string fileContent)
             for (std::sregex_iterator it = begin; it != end; it++)
             {
                 match = *it;
-                m_customDataTypeVector.push_back(match.str(0));
+                m_customDataTypeNameVector.push_back(match.str(0));
             }
         }
         
@@ -116,17 +209,22 @@ void Parser::parseCustomDataTypesInImport(std::string fileContent)
 { 
     std::smatch match;
     
-    for (std::vector<std::string>::size_type i = m_customDataTypeVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
+    for (std::vector<std::string>::size_type i = m_customDataTypeNameVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
     {
-        std::string patternOneString = m_customDataTypeVector[i] + " ::=\\n\\s*.*\\n\\s*.*";
-        std::string patternTwoString = m_customDataTypeVector[i] + " ::=\\n\\s*((.*\\n)*?)\\s*}";
+        std::string patternOneString = m_customDataTypeNameVector[i] + " ::=\\n\\s*[^:upper:c].*?\\n\\s*.*";
+        std::string patternTwoString = m_customDataTypeNameVector[i] + " ::=\\n\\s*CHOICE((.*\\n)*?)\\s*\\}"; 
         std::regex patternOne(patternOneString);
         std::regex patternTwo(patternTwoString);
+        std::regex patternThree("CHOICE");
         if (std::regex_search(fileContent, match, patternOne))
         {
-            m_customDataTypeStringVector.push_back(match.str(0)); 
+            std::string matchString = match.str(0);
+            if (!std::regex_search(matchString, match, patternThree))
+            {
+                m_customDataTypeStringVector.push_back(matchString);
+            }
         }
-        else if (std::regex_search(fileContent, match, patternTwo))
+        if (std::regex_search(fileContent, match, patternTwo))
         {
             m_customDataTypeStringVector.push_back(match.str(0)); 
         }
@@ -235,6 +333,7 @@ void Parser::addParentNodes(std::vector<std::string> & parentVector, std::vector
 { 
     std::regex patternParentOID("\\(.\\)");
     std::smatch match;
+    DataType dataType;
     for (std::vector<std::string>::size_type i = parentVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
     {
         if (parentVector[i] == "iso")
@@ -243,13 +342,15 @@ void Parser::addParentNodes(std::vector<std::string> & parentVector, std::vector
         }
         else
         {
-            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], "", NewDataType::NO, BaseDataType::NULL_D, EncodingComplexity::PRIMITIVE, DataVisibility::UNIVERSAL, 0, "", AccessType::NONE, StatusType::NONE, m_pNode);
+            m_pNode = m_pTree -> addNode(vectorOID[i], parentVector[i], dataType, "", AccessType::NOT_ACCESSIBLE, StatusType::MANDATORY, m_pNode);
         }    
     }
 }
 
 Node * Parser::addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std::vector<std::string> & parentVector)
 {
+    
+    DataType dataType;
     for (std::list<Node>::iterator it = m_pTree -> m_nodeList.begin(); it != m_pTree -> m_nodeList.end(); it++)
     {
         if ((*it).m_name == parentVector.front())
@@ -258,7 +359,7 @@ Node * Parser::addNodeOneOrMore(std::string & nodeName, unsigned int & OID, std:
             break;
         }
     }
-    return m_pTree -> addNode(OID, nodeName, "", NewDataType::NO, BaseDataType::NULL_D, EncodingComplexity::PRIMITIVE, DataVisibility::UNIVERSAL, 0, "", AccessType::NONE, StatusType::NONE, m_pNode);
+    return m_pTree -> addNode(OID, nodeName, dataType, "", AccessType::NOT_ACCESSIBLE, StatusType::MANDATORY, m_pNode);
 }
 
 void Parser::parseNodes(std::string fileContent)
@@ -274,26 +375,20 @@ void Parser::parseNodes(std::string fileContent)
     AccessType accessType;
     StatusType statusType;
     std::string description;
-    std::string  dataType;
-    NewDataType newDataType;
-    BaseDataType baseType;
-    EncodingComplexity complexity;
-    DataVisibility visibility;
-    unsigned int lengthLimit;
+    DataType dataType;
     Node * pParent = nullptr;
     
     for (std::sregex_iterator it = begin; it != end; it++)
     {
         match = *it;
         nodeString = match.str(0);
-        parseNodeParameters(nodeString, nodeName, OID, dataType, newDataType, baseType, complexity, visibility, lengthLimit, accessType, statusType, description, &pParent);
-        m_pNode = addNode(nodeName, OID, dataType, newDataType, baseType, complexity, visibility, lengthLimit, accessType, statusType, description, &pParent);
+        parseNodeParameters(nodeString, nodeName, OID, dataType, description, accessType, statusType, &pParent);
+        m_pNode = addNode(nodeName, OID, dataType, description, accessType, statusType, &pParent);
     }
      
 }
 
-void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, std::string & dataType, NewDataType & newDataType, BaseDataType & baseType, EncodingComplexity & complexity,
-                                 DataVisibility & visibility, unsigned int & lengthLimit, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, DataType & dataType, std::string & description, AccessType & accessType, StatusType & statusType, Node ** pParent)
 {
     std::regex pattern("(\\w+) OBJECT-TYPE");
     std::smatch match;
@@ -312,7 +407,8 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
     pattern.assign("SYNTAX  ((.*\\n)*?)    ACCESS");
     if (std::regex_search(nodeString, match, pattern))
     {
-        dataType = match.str(1);
+        std::string matchString = match.str(1);
+        dataType = parseDataType(matchString);
     }
     
     pattern.assign("ACCESS  (.+)");
@@ -378,19 +474,25 @@ void Parser::parseNodeParameters(std::string & nodeString, std::string & nodeNam
 }
 
 
-Node * Parser::addNode(std::string & nodeName, unsigned int & OID, std::string & dataType, NewDataType & newDataType, BaseDataType & baseType, EncodingComplexity & complexity, DataVisibility & visibility,
-                       unsigned int & lengthLimit, AccessType & accessType, StatusType & statusType, std::string & description, Node ** pParent)
+Node * Parser::addNode(std::string & nodeName, unsigned int & OID, DataType & dataType, std::string & description, AccessType & accessType, StatusType & statusType, Node ** pParent)
 {
-    return m_pTree -> addNode(OID, nodeName, dataType, newDataType, baseType, complexity, visibility, lengthLimit, description, accessType, statusType, *pParent);
+    return m_pTree -> addNode(OID, nodeName, dataType, description, accessType, statusType, *pParent);
+}
+
+
+DataType Parser::parseDataType(std::string & dataTypeString)
+{
+    DataType dataType;
+    return dataType;
 }
 
 void Parser::parseCustomDataTypesInMain(std::string fileContent)
 {
     std::smatch match;
     
-    std::string patternOneString ="\\w* ::=\\n\\s*.*[^{]\\n";
-    std::string patternTwoString = "\\w* ::=\\n\\s*SEQUENCE((.*\\n)*?)\\s*}";
-    std::string patternThreeString = "\\w* ::=\\n\\s*CHOICE((.*\\n)*?)\\s*}";
+    std::string patternOneString ="\\w* ::=\\n\\s*.*[^\\{]\\n";
+    std::string patternTwoString = "\\w* ::=\\n\\s*SEQUENCE((.*\\n)*?)\\s*\\}";
+    std::string patternThreeString = "\\w* ::=\\n\\s*CHOICE((.*\\n)*?)\\s*\\}";
     
     std::regex patternOne(patternOneString);
     std::regex patternTwo(patternTwoString);
@@ -424,9 +526,9 @@ void Parser::parseCustomDataTypesInMain(std::string fileContent)
 }
 
 void Parser::parseCustomDataTypeInformation()
-{
-    
+{ 
     std::smatch match; 
+    std::regex patternName("(\\w*) ::=");
     std::regex patternSequence("SEQUENCE");
     std::regex patternChoice("CHOICE");
     std::regex patternInteger("::=\\n\\s*INTEGER");
@@ -434,48 +536,115 @@ void Parser::parseCustomDataTypeInformation()
     std::regex patternObjectIdentifier("::=\\n\\s*OBJECT IDENTIFIER");
     std::regex patternNULL("::=\\n\\s*NULL");
     
-    m_customDataTypeVector.clear();
+    std::regex patternImplicit("IMPLICIT");
+    std::regex patternExplicit("EXPLICIT");
+    
+    std::regex patternUniversal("UNIVERSAL");
+    std::regex patternApplication("APPLICATION");
+    std::regex patternContextSpecific("CONTEXT-SPECIFIC");
+    std::regex patternPrivate("PRIVATE");
+    
+    std::regex patternSingleElementSequence("\\s*(\\w*?[^{},=])\\n\\s*.*?[^{}]\\n");
+    std::regex patternSingleElementChoice("\\s*(\\w*)\\n"); //Fix this!!!
+    
+    DataType dataType;
+    
+    m_customDataTypeNameVector.clear();
     
     for (std::vector<std::string>::size_type i = m_customDataTypeStringVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
     {
-        //Get all names in the right sequence
-        //Get all parameters(newDataType, baseType, complexity(if no explicit/implicit, use universal), visibility, lengthLimit)
         std::string & dataString = m_customDataTypeStringVector[i];
+        
+        if (std::regex_search(dataString, match, patternName))
+        {
+           m_customDataTypeNameVector.push_back(match.str(1));
+        }
         
         if (std::regex_search(dataString, match, patternSequence))
         {
-             //Constructed, sequence type
-             //Parse for sequence elements
+            
+            dataType.m_baseType = BaseDataType::SEQUENCE;
+            dataType.m_complexity = EncodingComplexity::CONSTRUCTED;
+            std::sregex_iterator beginS(dataString.cbegin(), dataString.cend(), patternSingleElementSequence); 
+            std::sregex_iterator endS;
+            for (std::sregex_iterator it = beginS; it != endS; it++)
+            {
+                match = *it;
+                dataType.nodeNameList.push_back(match.str(1));
+            }
         }
         else if (std::regex_search(dataString, match, patternChoice))
         {
-            //Constructed, choice type
-            //Parse for choice elements
+            dataType.m_baseType = BaseDataType::CHOICE;
+            dataType.m_complexity = EncodingComplexity::CONSTRUCTED;
+            std::sregex_iterator beginC(dataString.cbegin(), dataString.cend(), patternSingleElementChoice); 
+            std::sregex_iterator endC;
+            for (std::sregex_iterator it = beginC; it != endC; it++)
+            {
+                match = *it;
+                dataType.nodeNameList.push_back(match.str(1));
+            }
+        
         }
         else if (std::regex_search(dataString, match, patternInteger))
         {
-            //Primitive type, integer
+            dataType.m_baseType = BaseDataType::INTEGER;
+            dataType.m_complexity = EncodingComplexity::PRIMITIVE;
         }
         else if (std::regex_search(dataString, match, patternOctetString))
         {
-            //Primitive type, octet string
+            dataType.m_baseType = BaseDataType::OCTET_STRING;
+            dataType.m_complexity = EncodingComplexity::PRIMITIVE;
         }
         else if (std::regex_search(dataString, match, patternObjectIdentifier))
         {
-            //Primitive type, object identifier
+            dataType.m_baseType = BaseDataType::OBJECT_IDENTIFIER;
+            dataType.m_complexity = EncodingComplexity::PRIMITIVE;
         }
-        else if (std::regex_search(dataString, match, patternNULL))
+        else
         {
-            //Primitive type, null
+            dataType.m_baseType = BaseDataType::NULL_D;
+            dataType.m_complexity = EncodingComplexity::PRIMITIVE;
         }
         
+        if (std::regex_search(dataString, match, patternImplicit))
+        {
+            dataType.m_encodingType = EncodingType::IMPLICIT;
+        }
+        else if (std::regex_search(dataString, match, patternExplicit))
+        {
+            dataType.m_encodingType = EncodingType::EXPLICIT;
+        }
+        else
+        {
+            dataType.m_encodingType = EncodingType::UNIVERSAL;
+        }
+        
+        if (std::regex_search(dataString, match, patternUniversal))
+        {
+            dataType.m_visibility = DataVisibility::UNIVERSAL;
+        }
+        else if (std::regex_search(dataString, match, patternApplication))
+        {
+            dataType.m_visibility = DataVisibility::APPLICATION;
+        }
+        else if (std::regex_search(dataString, match, patternPrivate))
+        {
+            dataType.m_visibility = DataVisibility::PRIVATE;
+        }
+        else
+        {
+            dataType.m_visibility = DataVisibility::CONTEXT_SPECIFIC;
+        }
+        
+        m_customDataTypeVector.push_back(dataType);
     }
 }
 
 void Parser::parseMIBFile(std::string fileContent)
 {
     parseCustomDataTypesInMain(fileContent);
-    getCustomDataTypeNames();
+    parseCustomDataTypeInformation();
     parseDiminishedNodes(fileContent);
     parseNodes(fileContent);
 }
