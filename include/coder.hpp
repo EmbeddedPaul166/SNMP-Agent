@@ -2,18 +2,9 @@
 #define CODER_HPP
 
 #include <string>
+#include <vector>
 #include "datatype.hpp"
 #include "node.hpp"
-
-enum class TagTable
-{
-    INTEGER = 0x02,
-    OCTET_STRING = 0x04,
-    OBJECT_IDENTIFIER = 0x06,
-    NULL_D = 0x05,
-    SEQUENCE_OF = 0x10,
-    CHOICE = 0x12
-};
 
 class Coder
 {
@@ -21,18 +12,18 @@ class Coder
         Coder();
         ~Coder();
         
-        unsigned int encode(Node & node); 
+        std::vector<int8_t> encodeInteger(DataType & dataType, int & data);
+        std::vector<int8_t> encodeOctetString(DataType & dataType, std::string & data);
+        std::vector<int8_t> encodeObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data);
+        std::vector<int8_t> encodeNULL(DataType & dataType);
+        std::vector<int8_t> encodeSequence(std::vector<DataType> & dataTypeVector);
         
     private:
-        unsigned int encodeInteger(Node & node);
-        unsigned int encodeOctetString(Node & node);
-        unsigned int encodeObjectIdentifier(Node & node);
-        unsigned int encodeNULL(Node & node);
-        unsigned int encodeSequence(Node & node);
-        unsigned int encodeChoice(Node & node);
+        int8_t encodeID(DataType & dataType);
+        std::vector<int8_t> encodeLength(int & length);
+        std::vector<int8_t> splitIntoBytes(int & number, int & numberOfBytes);
+        std::vector<int8_t> splitIntoBytes(int & number);
         
-        unsigned int encodeID(DataVisibility visibility, EncodingComplexity complexity);
-        unsigned int encodeLength(unsigned int length);
     protected:
  
 };

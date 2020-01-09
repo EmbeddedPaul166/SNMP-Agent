@@ -2,7 +2,6 @@
 #include "parser.hpp"
 
 //TODO: Check what is the number in types like these: [APPLICATION X], where X is the number
-//TODO: Coder api
 
 Parser::Parser()
 {
