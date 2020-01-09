@@ -10,6 +10,7 @@ enum class BaseDataType
     INTEGER,
     OCTET_STRING,
     OBJECT_IDENTIFIER,
+    BOOLEAN,
     NULL_D,
     SEQUENCE,
     SEQUENCE_OF,
