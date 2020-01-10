@@ -38,23 +38,40 @@ std::vector<std::byte> Coder::encodeOctetString(DataType & dataType, std::string
 std::vector<std::byte> Coder::encodeObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data)
 {
     std::vector<std::byte> dataVector;
-    uint8_t firstElement = 40*data[0] + data[1];
-    firstElement &= ~(1 << 7);
-    dataVector.push_back(static_cast<std::byte>(firstElement));
-    for (std::vector<unsigned int>::size_type i = 2; i < data.size(); i++)
+    dataVector.push_back(encodeID(dataType));
+    int length = data.size() - 1;
+    std::vector<std::byte> lengthInBytes = encodeLength(length);
+    dataVector.insert(dataVector.end(), lengthInBytes.begin(), lengthInBytes.end());
+    if (data.size() > 2)
     {
-        if (i == data.size() - 2)
+        uint8_t firstElement = 40*data[0] + data[1];
+        firstElement |= (1 << 7);
+        dataVector.push_back(static_cast<std::byte>(firstElement));
+        for (std::vector<unsigned int>::size_type i = 2; i < data.size(); i++)
         {
-            uint8_t element = data[i];
-            element |= (1 << 7);
-            dataVector.push_back(static_cast<std::byte>(element));
+            if (i == data.size() - 1)
+            {
+                uint8_t element = data[i];
+                element &= ~(1 << 7);
+                dataVector.push_back(static_cast<std::byte>(element));
+            }
+            else
+            {
+                uint8_t element = data[i];
+                element |= (1 << 7);
+                dataVector.push_back(static_cast<std::byte>(element));
+            }
         }
-        else
-        {
-            uint8_t element = data[i];
-            element &= ~(1 << 7);
-            dataVector.push_back(static_cast<std::byte>(element));
-        }
+    }
+    else if (data.size() == 2)
+    {
+        uint8_t firstElement = 40*data[0] + data[1];
+        firstElement &= ~(1 << 7);
+        dataVector.push_back(static_cast<std::byte>(firstElement));
+    }
+    else
+    {
+        dataVector.push_back(static_cast<std::byte>(0));
     }
     return dataVector;
 }
@@ -104,9 +121,9 @@ std::byte Coder::encodeID(DataType & dataType)
     std::byte tagIntegerMask = static_cast<std::byte>(0x02);
     std::byte tagOctetStringMask = static_cast<std::byte>(0x04);
     std::byte tagObjectIdentifierMask = static_cast<std::byte>(0x06);
-    std::byte tagBooleanMask = static_cast<std::byte>(0x05);
-    std::byte tagNullMask = static_cast<std::byte>(0x10);
-    std::byte tagSequenceOfMask = static_cast<std::byte>(0x05);
+    std::byte tagBooleanMask = static_cast<std::byte>(0x01);
+    std::byte tagNullMask = static_cast<std::byte>(0x05);
+    std::byte tagSequenceOfMask = static_cast<std::byte>(0x10);
     
     if (dataType.m_visibility == DataVisibility::APPLICATION)
     {
@@ -159,27 +176,15 @@ std::vector<std::byte> Coder::splitIntoBytes(int & number, int & numberOfBytes)
     std::vector<std::byte> vectorOfBytes;
     if (number != 0)
     {
-        for (int i = 0; i < numberOfBytes; i++)
+       numberOfBytes = getNumberOfBytes(number);
+       for (int i = numberOfBytes - 1; i >= 0; i--) 
         {
-            vectorOfBytes.push_back(static_cast<std::byte>(number >> (i * 8)));
-            bool completeByteFlag = static_cast<bool>(vectorOfBytes[i] & static_cast<std::byte>((1 << 7)));
-            if (completeByteFlag && i == numberOfBytes - 1)
-            {
-                vectorOfBytes.push_back(static_cast<std::byte>(0));
-            }
+           vectorOfBytes.push_back(static_cast<std::byte>(((number >> i * 8) & 0xFF))); 
         }
-    }
-    else if (number == 0)
-    {
-        vectorOfBytes.push_back(static_cast<std::byte>(0));
-        numberOfBytes = 1;
     }
     else
     {
-        for (int i = 0; i < numberOfBytes; i++)
-        {
-            vectorOfBytes.push_back(static_cast<std::byte>(number >> (i * 8)));
-        }
+        vectorOfBytes.push_back(static_cast<std::byte>(0));
     }
     
     return vectorOfBytes;
@@ -187,42 +192,18 @@ std::vector<std::byte> Coder::splitIntoBytes(int & number, int & numberOfBytes)
 
 std::vector<std::byte> Coder::splitIntoBytes(int & number)
 {
-    int numberOfBytes = 0;
     std::vector<std::byte> vectorOfBytes;
     if (number != 0)
     {
-        while (number > 0)
+        int numberOfBytes = getNumberOfBytes(number);
+        for (int i = numberOfBytes - 1; i >= 0; i--)
         {
-            number >>= 8;
-            numberOfBytes++;
-        }  
-        
-        for (int i = 0; i < numberOfBytes; i++)
-        {
-            vectorOfBytes.push_back(static_cast<std::byte>(number >> (i * 8)));
-            bool completeByteFlag = static_cast<bool>((vectorOfBytes[i] >> 7) & static_cast<std::byte>(1));
-            if (completeByteFlag && i == numberOfBytes - 1)
-            {
-                vectorOfBytes.push_back(static_cast<std::byte>(0));
-            }
+           vectorOfBytes.push_back(static_cast<std::byte>(((number >> i * 8) & 0xFF))); 
         }
-    }
-    else if (number == 0)
-    {
-        vectorOfBytes.push_back(static_cast<std::byte>(0));
     }
     else
     {
-        while (number > 0)
-        {
-            number >>= 8;
-            numberOfBytes++;
-        }  
-        
-        for (int i = 0; i < numberOfBytes; i++)
-        {
-            vectorOfBytes.push_back(static_cast<std::byte>(number >> (i * 8)));
-        }
+        vectorOfBytes.push_back(static_cast<std::byte>(0));
     }
     
     return vectorOfBytes;
@@ -246,9 +227,10 @@ std::vector<std::byte> Coder::encodeLength(int & lengthInBytes)
     int numberOfSeptets = 0;
     if (lengthInBytes != 0)
     {
-        while (lengthInBytes > 0)
+        int len = lengthInBytes;
+        while (len != 0)
         {
-            lengthInBytes >>= 7;
+            len >>= 7;
             numberOfSeptets++;
         }  
         
@@ -257,14 +239,14 @@ std::vector<std::byte> Coder::encodeLength(int & lengthInBytes)
             if (i == numberOfSeptets - 1)
             {
                 int8_t num = lengthInBytes >> (i * 7);
-                num |= (1 << 7);
+                num &= ~(1 << 7);
                 vectorOfBytes.push_back(static_cast<std::byte>(num));
                 
             }
             else
             {
                 int8_t num = lengthInBytes >> (i * 7);
-                num &= ~(1 << 7);
+                num |= (1 << 7);
                 vectorOfBytes.push_back(static_cast<std::byte>(num));
             }
         }
@@ -275,4 +257,9 @@ std::vector<std::byte> Coder::encodeLength(int & lengthInBytes)
     }
     
     return vectorOfBytes;
+}
+
+int Coder::getNumberOfBytes(int number)
+{
+    return sizeof(int); 
 }

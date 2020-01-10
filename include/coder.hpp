@@ -2,6 +2,7 @@
 #define CODER_HPP
 
 #include <cstddef>
+#include <cmath>
 #include <string>
 #include <vector>
 #include "datatype.hpp"
@@ -26,6 +27,7 @@ class Coder
         std::vector<std::byte> splitIntoBytes(int & number, int & numberOfBytes);
         std::vector<std::byte> splitIntoBytes(int & number);
         std::vector<std::byte> splitIntoBytes(std::string & string);
+        int getNumberOfBytes(int number);
         
     protected:
  

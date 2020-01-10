@@ -109,3 +109,40 @@ void Manager::getNodeByOID(std::string & input)
     }
 }
 
+std::vector<std::byte> Manager::getEncodedInteger(DataType & dataType, int & data)
+{
+    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeInteger(dataType, data);
+    return encodedBytesVector;
+}
+
+std::vector<std::byte> Manager::getEncodedOctetString(DataType & dataType, std::string & data)
+{
+    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeOctetString(dataType, data);
+    return encodedBytesVector;
+}
+
+std::vector<std::byte> Manager::getEncodedObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data)
+{
+    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeObjectIdentifier(dataType, data);
+    return encodedBytesVector;
+}
+
+std::vector<std::byte> Manager::getEncodedBoolean(DataType & dataType, bool & data)
+{
+    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeBoolean(dataType, data);
+    return encodedBytesVector;
+}
+
+std::vector<std::byte> Manager::getEncodedNULL(DataType & dataType)
+{
+    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeNULL(dataType);
+    return encodedBytesVector;
+}
+
+std::vector<std::byte> Manager::getEncodedSequence(std::vector<DataType> & dataTypeVector)
+{
+    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeSequence(dataTypeVector);    
+    return encodedBytesVector;
+}
+
+
