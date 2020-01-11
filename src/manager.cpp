@@ -139,6 +139,9 @@ std::vector<std::byte> Manager::getEncodedNULL(DataType & dataType)
     return encodedBytesVector;
 }
 
+//Call startASequence, then addStuffTo it including startASequence, you will need beginVector and endVector
+//For every startASequence you need to call endASequence
+
 void Manager::startASequence(DataType & dataType, std::vector<std::byte> & dataVector)
 {
    m_pCoder -> startASequence(dataType, dataVector); 
@@ -164,9 +167,9 @@ void Manager::addBoolean(DataType & dataType, bool & data, int & lengthInBytes, 
     m_pCoder -> addBoolean(dataType, data, lengthInBytes, dataVector);
 }
 
-void Manager::addNULL(DataType & dataType, std::vector<std::byte> & dataVector)
+void Manager::addNULL(DataType & dataType, int & lengthInBytes, std::vector<std::byte> & dataVector)
 {
-    m_pCoder -> addNULL(dataType, dataVector);
+    m_pCoder -> addNULL(dataType, lengthInBytes, dataVector);
 }
 
 void Manager::endASequence(int & lengthInBytes, std::vector<std::byte> & dataVector)
@@ -174,10 +177,21 @@ void Manager::endASequence(int & lengthInBytes, std::vector<std::byte> & dataVec
     m_pCoder -> endASequence(lengthInBytes, dataVector);
 }
 
-std::vector<std::byte> Manager::getEncodedSequence(std::vector<std::byte> beginVector, std::vector<std::byte> endVector)
+std::vector<std::byte> Manager::getEncodedSequence(std::vector<std::byte> & beginVector, std::vector<std::byte> & endVector)
 {
     m_pCoder -> encodeSequence(beginVector, endVector);
     return beginVector;
+}
+
+void Manager::endSubSequence(int & lengthInBytesUpper, int & lengthInBytesLower, std::vector<std::byte> & beginVector)
+{
+    m_pCoder -> endSubSequence(lengthInBytesUpper, lengthInBytesLower, beginVector);
+}
+
+std::vector<std::byte> Manager::getEncodedSubSequence(std::vector<std::byte> & beginVector, std::vector<std::byte> & endVector, std::vector<std::byte> & endVectorUpper)
+{
+    m_pCoder -> encodeSubSequence(beginVector, endVector, endVectorUpper);
+    return endVectorUpper;
 }
 
 

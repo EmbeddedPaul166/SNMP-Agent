@@ -1,6 +1,5 @@
 #include "coder.hpp"
 
-
 Coder::Coder()
 {
    m_startSequenceCount = 0;
@@ -111,7 +110,7 @@ void Coder::startASequence(DataType & dataType, std::vector<std::byte> & dataVec
 void Coder::addInteger(DataType & dataType, int & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
 {
     std::vector<std::byte> vector;
-    lengthInBytes += getNumberOfBytes(data);
+    lengthInBytes += getNumberOfBytes(data) + 2;
     vector = encodeInteger(dataType, data);
     dataVector.insert(dataVector.end(), vector.begin(), vector.end());
 }
@@ -119,7 +118,7 @@ void Coder::addInteger(DataType & dataType, int & data, int & lengthInBytes, std
 void Coder::addOctetString(DataType & dataType, std::string & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
 {
     std::vector<std::byte> vector;
-    lengthInBytes += getNumberOfBytes(data);
+    lengthInBytes += getNumberOfBytes(data) + 2;
     vector = encodeOctetString(dataType, data);
     dataVector.insert(dataVector.end(), vector.begin(), vector.end());
 }
@@ -127,7 +126,7 @@ void Coder::addOctetString(DataType & dataType, std::string & data, int & length
 void Coder::addObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
 {
     std::vector<std::byte> vector;
-    lengthInBytes += getNumberOfBytes(data);
+    lengthInBytes += getNumberOfBytes(data) + 2;
     vector = encodeObjectIdentifier(dataType, data);
     dataVector.insert(dataVector.end(), vector.begin(), vector.end());
 }
@@ -135,14 +134,15 @@ void Coder::addObjectIdentifier(DataType & dataType, std::vector<unsigned int> &
 void Coder::addBoolean(DataType & dataType, bool & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
 {
     std::vector<std::byte> vector;
-    lengthInBytes += 1;
+    lengthInBytes += 3;
     vector = encodeBoolean(dataType, data);
     dataVector.insert(dataVector.end(), vector.begin(), vector.end());
 }
 
-void Coder::addNULL(DataType & dataType, std::vector<std::byte> & dataVector)
+void Coder::addNULL(DataType & dataType, int & lengthInBytes, std::vector<std::byte> & dataVector)
 {
     std::vector<std::byte> vector;
+    lengthInBytes += 2;
     vector = encodeNULL(dataType);
     dataVector.insert(dataVector.end(), vector.begin(), vector.end());
 }
@@ -154,7 +154,15 @@ void Coder::endASequence(int & lengthInBytes, std::vector<std::byte> & beginVect
     m_endSequenceCount++;
 }
 
-std::vector<std::byte> Coder::encodeSequence(std::vector<std::byte> beginVector, std::vector<std::byte> endVector)
+void Coder::endSubSequence(int & lengthInBytesUpper, int & lengthInBytesLower, std::vector<std::byte> & beginVector)
+{
+    lengthInBytesUpper += lengthInBytesLower + 2;
+    std::vector<std::byte> lengthInBytesVector = encodeLength(lengthInBytesLower);
+    beginVector.insert(beginVector.end(), lengthInBytesVector.begin(), lengthInBytesVector.end());
+    m_endSequenceCount++;
+}
+
+std::vector<std::byte> Coder::encodeSequence(std::vector<std::byte> & beginVector, std::vector<std::byte> & endVector)
 {
     if (m_startSequenceCount == m_endSequenceCount)
     {
@@ -166,6 +174,13 @@ std::vector<std::byte> Coder::encodeSequence(std::vector<std::byte> beginVector,
         beginVector.clear();
         return beginVector;
     }
+}
+
+std::vector<std::byte> Coder::encodeSubSequence(std::vector<std::byte> & beginVector, std::vector<std::byte> & endVector, std::vector<std::byte> & endVectorUpper)
+{
+    beginVector.insert(beginVector.end(), endVector.begin(), endVector.end());
+    endVectorUpper.insert(endVectorUpper.end(), beginVector.begin(), beginVector.end());
+    return endVectorUpper;
 }
 
 std::byte Coder::encodeID(DataType & dataType)
@@ -326,7 +341,7 @@ int Coder::getNumberOfBytes(int number)
 
 int Coder::getNumberOfBytes(std::string string)
 {
-    return sizeof(string); 
+    return string.size(); 
 }
 
 int Coder::getNumberOfBytes(std::vector<unsigned int> vector)
