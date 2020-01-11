@@ -25,7 +25,14 @@ class Manager
         std::vector<std::byte> getEncodedObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data);
         std::vector<std::byte> getEncodedBoolean(DataType & dataType, bool & data);
         std::vector<std::byte> getEncodedNULL(DataType & dataType);
-        std::vector<std::byte> getEncodedSequence(std::vector<DataType> & dataTypeVector);
+        void startASequence(DataType & dataType, std::vector<std::byte> & dataVector);
+        void addInteger(DataType & dataType, int & data, int & lengthInBytes, std::vector<std::byte> & dataVector);
+        void addOctetString(DataType & dataType, std::string & data, int & lengthInBytes, std::vector<std::byte> & dataVector);
+        void addObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data, int & lengthInBytes, std::vector<std::byte> & dataVector);
+        void addBoolean(DataType & dataType, bool & data, int & lengthInBytes, std::vector<std::byte> & dataVector);
+        void addNULL(DataType & dataType, std::vector<std::byte> & dataVector);
+        void endASequence(int & lengthInBytes, std::vector<std::byte> & dataVector);
+        std::vector<std::byte> getEncodedSequence(std::vector<std::byte> beginVector, std::vector<std::byte> endVector);
     private:
         std::vector<unsigned int> getOIDVector(std::string & input);
         std::unique_ptr<Parser> m_pParser;

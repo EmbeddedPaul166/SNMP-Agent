@@ -139,10 +139,46 @@ std::vector<std::byte> Manager::getEncodedNULL(DataType & dataType)
     return encodedBytesVector;
 }
 
-std::vector<std::byte> Manager::getEncodedSequence(std::vector<DataType> & dataTypeVector)
+void Manager::startASequence(DataType & dataType, std::vector<std::byte> & dataVector)
 {
-    std::vector<std::byte> encodedBytesVector = m_pCoder -> encodeSequence(dataTypeVector);    
-    return encodedBytesVector;
+   m_pCoder -> startASequence(dataType, dataVector); 
 }
+
+void Manager::addInteger(DataType & dataType, int & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    m_pCoder -> addInteger(dataType, data, lengthInBytes, dataVector);
+}
+
+void Manager::addOctetString(DataType & dataType, std::string & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    m_pCoder -> addOctetString(dataType, data, lengthInBytes, dataVector);
+}
+
+void Manager::addObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    m_pCoder -> addObjectIdentifier(dataType, data, lengthInBytes, dataVector);
+}
+
+void Manager::addBoolean(DataType & dataType, bool & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    m_pCoder -> addBoolean(dataType, data, lengthInBytes, dataVector);
+}
+
+void Manager::addNULL(DataType & dataType, std::vector<std::byte> & dataVector)
+{
+    m_pCoder -> addNULL(dataType, dataVector);
+}
+
+void Manager::endASequence(int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    m_pCoder -> endASequence(lengthInBytes, dataVector);
+}
+
+std::vector<std::byte> Manager::getEncodedSequence(std::vector<std::byte> beginVector, std::vector<std::byte> endVector)
+{
+    m_pCoder -> encodeSequence(beginVector, endVector);
+    return beginVector;
+}
+
 
 

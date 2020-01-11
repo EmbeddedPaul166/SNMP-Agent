@@ -3,7 +3,8 @@
 
 Coder::Coder()
 {
-    
+   m_startSequenceCount = 0;
+   m_endSequenceCount = 0;
 }
 
 Coder::~Coder()
@@ -101,11 +102,70 @@ std::vector<std::byte> Coder::encodeNULL(DataType & dataType)
     return dataVector;
 }
 
-//TODO: Encode sequences, but first check if primitive types are working correctly
-std::vector<std::byte> Coder::encodeSequence(std::vector<DataType> & dataTypeVector)
+void Coder::startASequence(DataType & dataType, std::vector<std::byte> & dataVector)
 {
-    std::vector<std::byte> dataVector;
-    return dataVector;
+    dataVector.push_back(encodeID(dataType));
+    m_startSequenceCount++;
+}
+
+void Coder::addInteger(DataType & dataType, int & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    std::vector<std::byte> vector;
+    lengthInBytes += getNumberOfBytes(data);
+    vector = encodeInteger(dataType, data);
+    dataVector.insert(dataVector.end(), vector.begin(), vector.end());
+}
+
+void Coder::addOctetString(DataType & dataType, std::string & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    std::vector<std::byte> vector;
+    lengthInBytes += getNumberOfBytes(data);
+    vector = encodeOctetString(dataType, data);
+    dataVector.insert(dataVector.end(), vector.begin(), vector.end());
+}
+
+void Coder::addObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    std::vector<std::byte> vector;
+    lengthInBytes += getNumberOfBytes(data);
+    vector = encodeObjectIdentifier(dataType, data);
+    dataVector.insert(dataVector.end(), vector.begin(), vector.end());
+}
+
+void Coder::addBoolean(DataType & dataType, bool & data, int & lengthInBytes, std::vector<std::byte> & dataVector)
+{
+    std::vector<std::byte> vector;
+    lengthInBytes += 1;
+    vector = encodeBoolean(dataType, data);
+    dataVector.insert(dataVector.end(), vector.begin(), vector.end());
+}
+
+void Coder::addNULL(DataType & dataType, std::vector<std::byte> & dataVector)
+{
+    std::vector<std::byte> vector;
+    vector = encodeNULL(dataType);
+    dataVector.insert(dataVector.end(), vector.begin(), vector.end());
+}
+
+void Coder::endASequence(int & lengthInBytes, std::vector<std::byte> & beginVector)
+{
+    std::vector<std::byte> lengthInBytesVector = encodeLength(lengthInBytes);
+    beginVector.insert(beginVector.end(), lengthInBytesVector.begin(), lengthInBytesVector.end());
+    m_endSequenceCount++;
+}
+
+std::vector<std::byte> Coder::encodeSequence(std::vector<std::byte> beginVector, std::vector<std::byte> endVector)
+{
+    if (m_startSequenceCount == m_endSequenceCount)
+    {
+        beginVector.insert(beginVector.end(), endVector.begin(), endVector.end());
+        return beginVector;
+    }
+    else
+    {
+        beginVector.clear();
+        return beginVector;
+    }
 }
 
 std::byte Coder::encodeID(DataType & dataType)
@@ -261,5 +321,15 @@ std::vector<std::byte> Coder::encodeLength(int & lengthInBytes)
 
 int Coder::getNumberOfBytes(int number)
 {
-    return sizeof(int); 
+    return sizeof(number); 
+}
+
+int Coder::getNumberOfBytes(std::string string)
+{
+    return sizeof(string); 
+}
+
+int Coder::getNumberOfBytes(std::vector<unsigned int> vector)
+{
+    return vector.size() - 1;
 }
