@@ -8,8 +8,10 @@
 #include <cctype>
 #include <cmath>
 #include "parser.hpp"
+#include "tree.hpp"
 #include "filehandler.hpp"
 #include "coder.hpp"
+#include "validator.hpp"
 
 class Manager
 {
@@ -20,6 +22,7 @@ class Manager
         void parse(std::string filePath);
         void startParsing();
         void getNodeByOID(std::string & input);
+        Node * getNodeByName(std::string & input);
         std::vector<std::byte> getEncodedInteger(DataType & dataType, int & data);
         std::vector<std::byte> getEncodedOctetString(DataType & dataType, std::string & data);
         std::vector<std::byte> getEncodedObjectIdentifier(DataType & dataType, std::vector<unsigned int> & data);
@@ -41,6 +44,8 @@ class Manager
         std::unique_ptr<Parser> m_pParser;
         std::unique_ptr<FileHandler> m_pFileHandler;
         std::unique_ptr<Coder> m_pCoder;
+        std::unique_ptr<Validator> m_pValidator;
+        std::unique_ptr<Tree> m_pTree;
             
     protected:
     

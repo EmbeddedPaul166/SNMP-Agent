@@ -28,8 +28,9 @@ class Parser
                           std::string & complexity,
                           std::string & encodingType,
                           std::string & visibility,
-                          unsigned int & lengthLimit,
-                          unsigned int & rangeLimit,
+                          int & lengthLimit,
+                          int & rangeLimitLower,
+                          int & rangeLimitUpper,
                           std::string & description,
                           std::string & accessType,
                           std::string & statusType);
@@ -49,8 +50,8 @@ class Parser
         void parseNodes(std::string fileContent);
         void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, DataType & dataType, std::string & description, AccessType & accessType, StatusType & statusType, Node ** pParent);
         std::vector<std::string> m_importList;
-        std::vector<std::string> m_customDataTypeNameVector;
         std::vector<std::string> m_customDataTypeStringVector;
+        std::vector<std::string> m_customDataTypeNameVector;
         std::vector<DataType> m_customDataTypeVector;
         std::unique_ptr<Tree> m_pTree; 
         Node * m_pNode;

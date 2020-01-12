@@ -5,6 +5,8 @@ Manager::Manager()
     m_pParser = std::make_unique<Parser>();
     m_pFileHandler = std::make_unique<FileHandler>();
     m_pCoder = std::make_unique<Coder>();
+    m_pValidator = std::make_unique<Validator>();
+    m_pTree = std::make_unique<Tree>();
 }
 
 Manager::~Manager()
@@ -71,8 +73,9 @@ void Manager::getNodeByOID(std::string & input)
     std::string complexity;
     std::string encodingType;
     std::string visibility;
-    unsigned int lengthLimit;
-    unsigned int rangeLimit;
+    int lengthLimit;
+    int rangeLimitLower;
+    int rangeLimitUpper;
     std::string description;
     std::string accessType;
     std::string statusType;
@@ -85,7 +88,8 @@ void Manager::getNodeByOID(std::string & input)
                               encodingType,
                               visibility,
                               lengthLimit,
-                              rangeLimit,
+                              rangeLimitLower,
+                              rangeLimitUpper,
                               description,
                               accessType,
                               statusType);
@@ -98,7 +102,7 @@ void Manager::getNodeByOID(std::string & input)
         std::cout << "Encoding type: " << encodingType << std::endl;
         std::cout << "Visibility: " << visibility << std::endl;
         std::cout << "Length limit: " << lengthLimit << std::endl;
-        std::cout << "Range limit: " << rangeLimit << std::endl;
+        std::cout << "Range limit: " << rangeLimitUpper << std::endl;
         std::cout << "Description: " << description << std::endl;
         std::cout << "Access type: " << accessType << std::endl;
         std::cout << "Status type: " << statusType << std::endl; 
@@ -107,6 +111,11 @@ void Manager::getNodeByOID(std::string & input)
     {
         std::cout << "Node not found! Try different OID string." << std::endl;
     }
+}
+
+Node * Manager::getNodeByName(std::string & input)
+{
+    return m_pTree -> findNodeByName(input);
 }
 
 std::vector<std::byte> Manager::getEncodedInteger(DataType & dataType, int & data)

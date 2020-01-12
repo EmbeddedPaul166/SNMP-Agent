@@ -23,8 +23,9 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
                           std::string & complexity,
                           std::string & encodingType,
                           std::string & visibility,
-                          unsigned int & lengthLimit,
-                          unsigned int & rangeLimit,
+                          int & lengthLimit,
+                          int & rangeLimitLower,
+                          int & rangeLimitUpper,
                           std::string & description,
                           std::string & accessType,
                           std::string & statusType)
@@ -125,7 +126,8 @@ void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
         
         lengthLimit = dataType.m_lengthLimit;
         
-        rangeLimit = dataType.m_rangeLimit;
+        rangeLimitLower = dataType.m_rangeLimitLower;
+        rangeLimitUpper = dataType.m_rangeLimitUpper;
         
         description = m_pNode -> m_description;
         if (description == "")
@@ -521,7 +523,7 @@ DataType Parser::parseDataType(std::string & dataTypeString)
             else if (std::regex_search(dataTypeString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else if (std::regex_search(dataTypeString, match, patternOctetString))
@@ -535,7 +537,7 @@ DataType Parser::parseDataType(std::string & dataTypeString)
             else if (std::regex_search(dataTypeString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else if (std::regex_search(dataTypeString, match, patternObjectIdentifier))
@@ -549,7 +551,7 @@ DataType Parser::parseDataType(std::string & dataTypeString)
             else if (std::regex_search(dataTypeString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else if (std::regex_search(dataTypeString, match, patternNULL))
@@ -563,7 +565,7 @@ DataType Parser::parseDataType(std::string & dataTypeString)
             else if (std::regex_search(dataTypeString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else
@@ -583,7 +585,7 @@ DataType Parser::parseDataType(std::string & dataTypeString)
                 else if (std::regex_search(dataTypeString, match, patternBraceTwo))
                 {
                     std::stringstream conv(match.str(1));     
-                    conv >> dataType.m_rangeLimit;
+                    conv >> dataType.m_rangeLimitUpper;
                 }
             }
         }
@@ -658,6 +660,9 @@ void Parser::parseCustomDataTypeInformation()
     std::regex patternSingleElementSequence("\\s*(\\w*?[^{},=])\\n\\s*.*?[^{}]\\n");
     std::regex patternSingleElementChoice("(\\w+)\\n");
     
+    std::regex patternTagNumber("(\\d+)\\]");
+    
+    
     DataType dataType;
     
     m_customDataTypeNameVector.clear();
@@ -709,7 +714,7 @@ void Parser::parseCustomDataTypeInformation()
             else if (std::regex_search(dataString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else if (std::regex_search(dataString, match, patternOctetString))
@@ -724,7 +729,7 @@ void Parser::parseCustomDataTypeInformation()
             else if (std::regex_search(dataString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else if (std::regex_search(dataString, match, patternObjectIdentifier))
@@ -739,7 +744,7 @@ void Parser::parseCustomDataTypeInformation()
             else if (std::regex_search(dataString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         else
@@ -754,7 +759,7 @@ void Parser::parseCustomDataTypeInformation()
             else if (std::regex_search(dataString, match, patternBraceTwo))
             {
                 std::stringstream conv(match.str(1));     
-                conv >> dataType.m_rangeLimit;
+                conv >> dataType.m_rangeLimitUpper;
             }
         }
         
@@ -786,6 +791,12 @@ void Parser::parseCustomDataTypeInformation()
         else
         {
             dataType.m_visibility = DataVisibility::CONTEXT_SPECIFIC;
+        }
+        
+        if (std::regex_search(dataString, match, patternTagNumber))
+        {
+            int tag = std::stoi(match.str(1));
+            dataType.m_tag = tag;
         }
         
         m_customDataTypeVector.push_back(dataType);

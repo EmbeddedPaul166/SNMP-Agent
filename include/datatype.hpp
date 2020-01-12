@@ -41,7 +41,7 @@ enum class DataVisibility
 class DataType
 {
     public:
-        DataType(BaseDataType baseType, EncodingComplexity complexity, EncodingType encodingType, DataVisibility visibility, unsigned int lengthLimit, unsigned int rangeLimit);
+        DataType(BaseDataType baseType, EncodingComplexity complexity, EncodingType encodingType, DataVisibility visibility, unsigned int lengthLimit, unsigned int rangeLimitLower, unsigned int rangeLimitUpper);
         DataType();
         ~DataType();
         
@@ -49,9 +49,12 @@ class DataType
         EncodingComplexity m_complexity;
         EncodingType m_encodingType;
         DataVisibility m_visibility;
-        unsigned int m_lengthLimit;
-        unsigned int m_rangeLimit;
+        int m_lengthLimit;
+        int m_rangeLimitLower;
+        int m_rangeLimitUpper;
+        int m_tag;
         std::vector<std::string> m_nodeNameList;
+        std::vector<DataType> m_dataTypeList;
         
     private:
     protected:

@@ -107,7 +107,6 @@ void encodeASequenceInsideASequence(Manager & manager)
         std::bitset<8> x(std::to_integer<uint8_t>(beginVector[i]));
         std::cout << x << std::endl;
     }
-    
 }
 
 int main() 
