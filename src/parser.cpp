@@ -15,6 +15,11 @@ Parser::~Parser()
 }
 
 
+Node * Parser::getNodeByName(std::string name)
+{
+    return m_pTree -> findNodeByName(name);
+}
+
 void Parser::getNodeByOID(std::vector<unsigned int> vectorOfOID,
                           bool & isNodeFound,
                           unsigned int & OID,

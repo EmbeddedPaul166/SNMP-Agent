@@ -38,6 +38,12 @@ class Manager
         std::vector<std::byte> getEncodedSequence(std::vector<std::byte> & beginVector, std::vector<std::byte> & endVector);
         void endSubSequence(int & lengthInBytesUpper, int & lengthInBytesLower, std::vector<std::byte> & beginVector);
         std::vector<std::byte> getEncodedSubSequence(std::vector<std::byte> & beginVector, std::vector<std::byte> & endVector, std::vector<std::byte> & endVectorUpper);
+        
+        bool validate(DataType & dataType, DataType & nodeType, std::vector<std::string> & nodeNameVector);
+        bool validate(DataType & dataType, DataType & nodeType);
+        bool validate(DataType & dataType, DataType & nodeType, int & data);
+        bool validate(DataType & dataType, DataType & nodeType, std::string & data);
+        
 
     private:
         std::vector<unsigned int> getOIDVector(std::string & input);

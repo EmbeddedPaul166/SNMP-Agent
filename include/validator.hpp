@@ -12,10 +12,10 @@ class Validator
         Validator();
         ~Validator();
         
+        //bool validate(DataType & dataType, DataType & nodeType, std::vector<std::string> & nodeNameVector);
         bool validate(DataType & dataType, DataType & nodeType);
         bool validate(DataType & dataType, DataType & nodeType, int & data);
         bool validate(DataType & dataType, DataType & nodeType, std::string & data);
-        bool validate(DataType & dataType, DataType & nodeType, bool & data);
         
     private:
         

@@ -17,9 +17,12 @@ class Parser
         Parser();
         ~Parser(); 
         
+        std::vector<DataType> m_customDataTypeVector;
+        std::vector<std::string> m_customDataTypeNameVector;
         std::string isImportPresent(std::string fileContent);
         void parseMIBImportFile(std::string fileContent);
         void parseMIBFile(std::string fileContent);
+        Node * getNodeByName(std::string name);
         void getNodeByOID(std::vector<unsigned int> vectorOfOID,
                           bool & isNodeFound,
                           unsigned int & OID,
@@ -51,8 +54,6 @@ class Parser
         void parseNodeParameters(std::string & nodeString, std::string & nodeName, unsigned int & OID, DataType & dataType, std::string & description, AccessType & accessType, StatusType & statusType, Node ** pParent);
         std::vector<std::string> m_importList;
         std::vector<std::string> m_customDataTypeStringVector;
-        std::vector<std::string> m_customDataTypeNameVector;
-        std::vector<DataType> m_customDataTypeVector;
         std::unique_ptr<Tree> m_pTree; 
         Node * m_pNode;
         

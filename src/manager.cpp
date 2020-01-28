@@ -14,6 +14,42 @@ Manager::~Manager()
     
 }
 
+
+bool Manager::validate(DataType & dataType, DataType & nodeType, std::vector<std::string> & nodeNameVector)
+{
+    if (dataType.m_baseType == BaseDataType::SEQUENCE_OF)
+    {
+        nodeNameVector = nodeType.m_nodeNameList; 
+        if (nodeNameVector.size() == 1)
+        {
+            for (std::vector<std::string>::size_type i = m_pParser -> m_customDataTypeVector.size() - 1; i != (std::vector<std::string>::size_type) - 1; i--)
+            {
+                if (m_pParser -> m_customDataTypeNameVector[i] == nodeNameVector[0])
+                {
+                    DataType type = m_pParser -> m_customDataTypeVector[i];
+                    nodeNameVector = type.m_nodeNameList;
+                }
+            }
+        }
+    }
+    return m_pValidator -> validate(dataType, nodeType); 
+}
+
+bool Manager::validate(DataType & dataType, DataType & nodeType)
+{
+    return m_pValidator -> validate(dataType, nodeType);
+}
+
+bool Manager::validate(DataType & dataType, DataType & nodeType, int & data)
+{
+    return m_pValidator -> validate(dataType, nodeType, data);
+}
+
+bool Manager::validate(DataType & dataType, DataType & nodeType, std::string & data)
+{
+    return m_pValidator -> validate(dataType, nodeType, data);
+}
+
 void Manager::parse(std::string filePath)
 {
     std::string fileContent = m_pFileHandler -> readFile(filePath);
@@ -115,7 +151,7 @@ void Manager::getNodeByOID(std::string & input)
 
 Node * Manager::getNodeByName(std::string & input)
 {
-    return m_pTree -> findNodeByName(input);
+    return m_pParser -> getNodeByName(input);
 }
 
 std::vector<std::byte> Manager::getEncodedInteger(DataType & dataType, int & data)

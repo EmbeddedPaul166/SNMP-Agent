@@ -11,25 +11,32 @@ Validator::~Validator()
 }
 
 //Used for NULL, Boolean and sequence_of
-bool Validator::validate(DataType & dataType, DataType & nodeType)
+/*
+bool Validator::validate(DataType & dataType, DataType & nodeType,  std::vector<std::string> & nodeNameVector)
 {
     if (dataType.m_baseType == nodeType.m_baseType)
     {
-        if (dataType.m_baseType == BaseDataType::SEQUENCE_OF)
-        {
-            //sequence elements check
-            return true;
-        }
-        else
-        {
-            return true;
-        }
+        return true;
     }
     else
     {
         return false;
     }
 }
+*/
+
+bool Validator::validate(DataType & dataType, DataType & nodeType)
+{
+    if (dataType.m_baseType == nodeType.m_baseType)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    } 
+}
+
 
 //Used for integer
 bool Validator::validate(DataType & dataType, DataType & nodeType, int & data)
